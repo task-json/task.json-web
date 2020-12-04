@@ -37,7 +37,7 @@ const rootSlice = createSlice({
 			state.notifications.push({
 				id: new Date().toISOString(),
 				severity: "error",
-				text: action.error.message
+				text: action.error.message!
 			});
 		});
 		builder.addCase(getTasks.fulfilled, (state, action) => {
