@@ -53,4 +53,5 @@ const store = configureStore({
 
 export default store;
 
+export const rootActions = rootSlice.actions;
 export type RootState = ReturnType<typeof store.getState>;
