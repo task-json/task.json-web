@@ -15,8 +15,11 @@ import {
 	FirstPage,
 	LastPage,
 	SaveAlt,
-	FilterList
+	FilterList,
+	Add
 } from "@material-ui/icons"
+import { green } from "@material-ui/core/colors"
+import { makeStyles } from "@material-ui/core";
 
 const tableIcons = {
 	Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
@@ -43,17 +46,39 @@ interface Props {
 	columns: Column<object>[]
 }
 
+const useStyles = makeStyles(() => ({
+	add: {
+		color: green[500]
+	}
+}));
+
 function TodoList(props: Props) {
+	const classes = useStyles();
+
 	return (
 		<MaterialTable
+			options={{
+				showTitle: false,
+				searchFieldAlignment: "left"
+			}}
 			columns={[
 				{ title: "Projects", field: "projects" },
+				{ title: "P", field: "priority" },
 				{ title: "Text", field: "text" },
 				{ title: "Date", field: "date" },
-				{ title: "" }
+				{ title: "Contexts", field: "contexts" }
 			]}
 			data={props.data}
 			icons={tableIcons as any}
+			actions={[
+				{
+					icon: () => <Add className={classes.add} />,
+					tooltip: "Add Task",
+					isFreeAction: true,
+					onClick() {
+					}
+				}
+			]}
 		/>
 	);
 }
