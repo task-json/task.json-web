@@ -56,7 +56,7 @@ function Layout(props: Props) {
 				<Toolbar>
 					<StickerCheckOutline className={classes.icon} />
 					<Typography variant="h6" noWrap className={classes.title}>
-						Todo.txt
+						Todo.txt WebUI
 					</Typography>
 
 					<IconButton color="inherit" title="Settings">

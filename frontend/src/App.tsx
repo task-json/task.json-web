@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import TodoList from "./components/TodoList";
 import Layout from "./components/Layout";
-import { Column } from 'material-table';
+import TaskDialog from "./components/TaskDialog";
 import { useSelector } from 'react-redux';
 import { RootState } from "./store";
 import { Container, FormControl, Grid, InputLabel, makeStyles, MenuItem, Select, TextField, Typography } from '@material-ui/core';
@@ -30,12 +30,8 @@ function App() {
   const rootState = useSelector((state: RootState) => state);
   const classes = useStyles();
   const [view, setView] = useState("Tasks");
+  const [taskDialog, setTaskDialog] = useState(false);
 
-  const columns: Column<object>[] = [
-    { title: "Projects", field: "projects" },
-    { title: "Text", field: "text" },
-    { title: "Date", field: "date" }
-  ];
   const tasks = rootState.tasks;
   const projects = tasks.reduce((projects: Set<string>, task: TodoTxtItem) => {
     task.projects.forEach(proj => {
@@ -46,6 +42,11 @@ function App() {
 
   return (
     <Layout>
+      <TaskDialog
+        open={taskDialog}
+        onClose={() => setTaskDialog(false)}
+      />
+
       <Container>
         <Grid container alignItems="center" className={classes.head}>
           <Grid item className={classes.title}>
@@ -81,9 +82,10 @@ function App() {
             </FormControl>
           </Grid>
         </Grid>
+
         <TodoList
-          columns={columns}
           data={tasks}
+          onAdd={() => setTaskDialog(true)}
         />
       </Container>
     </Layout>

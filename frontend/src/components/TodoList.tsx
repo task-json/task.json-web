@@ -1,4 +1,4 @@
-import MaterialTable, { Column } from "material-table";
+import MaterialTable from "material-table";
 import { forwardRef } from "react";
 import {
 	AddBox,
@@ -42,8 +42,8 @@ const tableIcons = {
 };
 
 interface Props {
-	data: any,
-	columns: Column<object>[]
+	onAdd: () => void,
+	data: any
 }
 
 const useStyles = makeStyles(() => ({
@@ -62,10 +62,10 @@ function TodoList(props: Props) {
 				searchFieldAlignment: "left"
 			}}
 			columns={[
-				{ title: "Projects", field: "projects" },
 				{ title: "P", field: "priority" },
-				{ title: "Text", field: "text" },
 				{ title: "Date", field: "date" },
+				{ title: "Text", field: "text" },
+				{ title: "Projects", field: "projects" },
 				{ title: "Contexts", field: "contexts" }
 			]}
 			data={props.data}
@@ -75,8 +75,7 @@ function TodoList(props: Props) {
 					icon: () => <Add className={classes.add} />,
 					tooltip: "Add Task",
 					isFreeAction: true,
-					onClick() {
-					}
+					onClick: props.onAdd
 				}
 			]}
 		/>
