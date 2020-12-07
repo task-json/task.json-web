@@ -5,13 +5,3 @@ export type Notification = {
 	severity: Severity,
 	text: string
 };
-
-export type TodoItem = {
-	text: string,
-	priority: string,
-	complete: boolean,
-	completed: Date,
-	date: Date,
-	contexts: string[],
-	projects: string[]
-};
