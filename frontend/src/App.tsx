@@ -7,7 +7,7 @@ import { RootState } from "./store";
 import { Container, FormControl, Grid, InputLabel, makeStyles, MenuItem, Select, TextField, Typography } from '@material-ui/core';
 import { ChevronRight } from '@material-ui/icons';
 import { Autocomplete } from "@material-ui/lab";
-import { TodoTxtItem } from "jstodotxt";
+import { getProjects } from './utils/tasks';
 
 const useStyles = makeStyles(theme => ({
   title: {
@@ -33,12 +33,7 @@ function App() {
   const [taskDialog, setTaskDialog] = useState(false);
 
   const tasks = rootState.tasks;
-  const projects = tasks.reduce((projects: Set<string>, task: TodoTxtItem) => {
-    task.projects.forEach(proj => {
-      projects.add(proj);
-    });
-    return projects;
-  }, new Set());
+  const projects = getProjects(tasks);
 
   return (
     <Layout>
