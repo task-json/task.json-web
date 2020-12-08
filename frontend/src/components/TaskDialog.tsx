@@ -1,5 +1,24 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, makeStyles, TextField } from "@material-ui/core";
+import {
+	Button,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	FormControl,
+	InputLabel,
+	makeStyles,
+	MenuItem,
+	Select,
+	TextField
+} from "@material-ui/core";
+import {
+	KeyboardDatePicker
+} from "@material-ui/pickers";
+import { Autocomplete } from "@material-ui/lab";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
+import { getContexts, getProjects } from "../utils/tasks";
 
 interface Props {
 	open: boolean,
@@ -8,7 +27,8 @@ interface Props {
 
 const useStyles = makeStyles(theme => ({
 	input: {
-		marginBottom: theme.spacing(2)
+		marginBottom: theme.spacing(2),
+		width: "100%"
 	}
 }));
 
@@ -16,6 +36,27 @@ function TaskDialog(props: Props) {
 	const classes = useStyles();
 	const [text, setText] = useState("");
 	const [priority, setPriority] = useState("");
+	const [projects, setProjects] = useState([] as string[]);
+	const [contexts, setContexts] = useState([] as string[]);
+	const [date, setDate] = useState<Date | null>(null);
+
+	const tasks = useSelector((state: RootState) => state.tasks);
+	const allProjects = getProjects(tasks);
+	const allContexts = getContexts(tasks);
+
+	const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+	const reset = () => {
+		setText("");
+		setPriority("");
+		setProjects([]);
+		setContexts([]);
+	};
+
+	const handleClose = () => {
+		props.onClose();
+		reset();
+	};
 
 	return (
 		<Dialog open={props.open} onClose={props.onClose} maxWidth="xs">
@@ -27,29 +68,59 @@ function TaskDialog(props: Props) {
 					value={text}
 					onChange={event => setText(event.target.value)}
 					autoFocus
-					fullWidth
 				/>
-				<TextField
-					label="Priority"
+				<FormControl className={classes.input}>
+					<InputLabel id="priority-select">Priority</InputLabel>
+					<Select
+						labelId="priority-select"
+						value={priority}
+						onChange={event => setPriority(event.target.value as string)}
+					>
+						<MenuItem value={""}>
+							None
+						</MenuItem>
+						{alphabet.map(char => (
+							<MenuItem value={char}>
+								{char}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
+				<KeyboardDatePicker
 					className={classes.input}
-					fullWidth
+					label="Date"
+					format="yyyy-MM-dd"
+					value={date}
+					onChange={value => setDate(value)}
 				/>
-				<TextField
-					label="Projects"
+				<Autocomplete
+					multiple
+					freeSolo
 					className={classes.input}
-					fullWidth
+					value={projects}
+					onChange={(_, value) => setProjects(value)}
+					options={[...allProjects]}
+					renderInput={params => (
+						<TextField {...params} label="Projects" />
+					)}
 				/>
-				<TextField
-					label="Contexts"
+				<Autocomplete
+					multiple
+					freeSolo
 					className={classes.input}
-					fullWidth
+					value={contexts}
+					onChange={(_, value) => setContexts(value)}
+					options={[...allContexts]}
+					renderInput={params => (
+						<TextField {...params} label="Contexts" />
+					)}
 				/>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={props.onClose}>
+				<Button onClick={handleClose}>
 					Cancel
 				</Button>
-				<Button>
+				<Button onClick={reset}>
 					Reset
 				</Button>
 				<Button color="primary">
