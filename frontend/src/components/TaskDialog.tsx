@@ -49,6 +49,7 @@ function TaskDialog(props: Props) {
 	const reset = () => {
 		setText("");
 		setPriority("");
+		setDate(null);
 		setProjects([]);
 		setContexts([]);
 	};
