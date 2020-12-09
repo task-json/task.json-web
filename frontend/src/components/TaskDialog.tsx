@@ -16,9 +16,10 @@ import {
 } from "@material-ui/pickers";
 import { Autocomplete } from "@material-ui/lab";
 import { useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../store";
-import { getContexts, getProjects } from "../utils/tasks";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, rootActions } from "../store";
+import { getContexts, getProjects, parseTasks } from "../utils/tasks";
+import { TodoTxtItem } from "jstodotxt";
 
 interface Props {
 	open: boolean,
@@ -39,11 +40,12 @@ function TaskDialog(props: Props) {
 	const [projects, setProjects] = useState([] as string[]);
 	const [contexts, setContexts] = useState([] as string[]);
 	const [date, setDate] = useState<Date | null>(null);
+	const dispatch = useDispatch();
 	
 	// Error states
 	const [textError, setTextError] = useState(false);
 
-	const tasks = useSelector((state: RootState) => state.tasks);
+	const tasks = useSelector((state: RootState) => parseTasks(state.tasks));
 	const allProjects = getProjects(tasks);
 	const allContexts = getContexts(tasks);
 
@@ -68,7 +70,19 @@ function TaskDialog(props: Props) {
 		const error = text.length === 0;
 		if (error) {
 			setTextError(error);
+			return;
 		}
+		const task = new TodoTxtItem();
+		task.date = date;
+		task.text = text;
+		task.priority = priority.length ? priority : null;
+		task.projects = projects.length ? projects : null;
+		task.contexts = contexts.length ? contexts : null;
+		dispatch(rootActions.addTask(task.toString()));
+		dispatch(rootActions.addNotification({
+			severity: "success",
+			text: "Successfully add a new task"
+		}));
 	}
 
 	return (
@@ -96,7 +110,7 @@ function TaskDialog(props: Props) {
 							None
 						</MenuItem>
 						{alphabet.map(char => (
-							<MenuItem value={char}>
+							<MenuItem value={char} key={char}>
 								{char}
 							</MenuItem>
 						))}

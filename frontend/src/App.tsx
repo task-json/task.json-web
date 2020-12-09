@@ -7,7 +7,7 @@ import { RootState } from "./store";
 import { Container, FormControl, Grid, InputLabel, makeStyles, MenuItem, Select, TextField, Typography } from '@material-ui/core';
 import { ChevronRight } from '@material-ui/icons';
 import { Autocomplete } from "@material-ui/lab";
-import { getProjects } from './utils/tasks';
+import { getProjects, parseTasks } from './utils/tasks';
 
 const useStyles = makeStyles(theme => ({
   title: {
@@ -27,12 +27,11 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function App() {
-  const rootState = useSelector((state: RootState) => state);
+  const tasks = useSelector((state: RootState) => parseTasks(state.tasks));
   const classes = useStyles();
   const [view, setView] = useState("Tasks");
   const [taskDialog, setTaskDialog] = useState(false);
 
-  const tasks = rootState.tasks;
   const projects = getProjects(tasks);
 
   return (

@@ -20,6 +20,8 @@ import {
 } from "@material-ui/icons"
 import { green } from "@material-ui/core/colors"
 import { makeStyles } from "@material-ui/core";
+import { TodoTxtItem } from "jstodotxt";
+import { format } from "date-fns";
 
 const tableIcons = {
 	Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
@@ -43,7 +45,7 @@ const tableIcons = {
 
 interface Props {
 	onAdd: () => void,
-	data: any
+	data: TodoTxtItem[]
 }
 
 const useStyles = makeStyles(() => ({
@@ -63,7 +65,15 @@ function TodoList(props: Props) {
 			}}
 			columns={[
 				{ title: "P", field: "priority" },
-				{ title: "Date", field: "date" },
+				{
+					title: "Date",
+					field: "date",
+					render: row => (
+						<span>
+							{row.date && format(row.date, "yyyy-MM-dd")}
+						</span>
+					)
+				},
 				{ title: "Text", field: "text" },
 				{ title: "Projects", field: "projects" },
 				{ title: "Contexts", field: "contexts" }

@@ -3,17 +3,16 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { Notification } from "../types";
 import axios from "axios";
 import _ from "lodash";
-import { TodoTxtItem } from "jstodotxt";
 
 const getTasks = createAsyncThunk("getTasks", async () => {
 	const response = await axios.get("/tasks");
-	return response.data as TodoTxtItem[];
+	return response.data as string[];
 });
 
 const rootSlice = createSlice({
 	name: "app",
 	initialState: {
-		tasks: [] as TodoTxtItem[],
+		tasks: [] as string[],
 		notifications: [] as Notification[],
 		loading: false
 	},
@@ -28,7 +27,7 @@ const rootSlice = createSlice({
 		removeNotification(state, action: PayloadAction<string>) {
 			_.remove(state.notifications, e => e.id === action.payload);
 		},
-		addTask(state, action: PayloadAction<TodoTxtItem>) {
+		addTask(state, action: PayloadAction<string>) {
 			state.tasks.push(action.payload);
 		},
 		removeTask(state, action: PayloadAction<number>) {
@@ -36,10 +35,10 @@ const rootSlice = createSlice({
 		},
 		updateTask(state, action: PayloadAction<{
 			index: number,
-			item: TodoTxtItem
+			task: string
 		}>) {
-			const { index, item } = action.payload;
-			state.tasks[index] = item;
+			const { index, task } = action.payload;
+			state.tasks[index] = task;
 		},
 	},
 	extraReducers(builder) {
