@@ -39,6 +39,9 @@ function TaskDialog(props: Props) {
 	const [projects, setProjects] = useState([] as string[]);
 	const [contexts, setContexts] = useState([] as string[]);
 	const [date, setDate] = useState<Date | null>(null);
+	
+	// Error states
+	const [textError, setTextError] = useState(false);
 
 	const tasks = useSelector((state: RootState) => state.tasks);
 	const allProjects = getProjects(tasks);
@@ -52,6 +55,8 @@ function TaskDialog(props: Props) {
 		setDate(null);
 		setProjects([]);
 		setContexts([]);
+
+		setTextError(false);
 	};
 
 	const handleClose = () => {
@@ -59,15 +64,25 @@ function TaskDialog(props: Props) {
 		reset();
 	};
 
+	const submit = () => {
+		const error = text.length === 0;
+		if (error) {
+			setTextError(error);
+		}
+	}
+
 	return (
 		<Dialog open={props.open} onClose={props.onClose} maxWidth="xs">
 			<DialogTitle>Add Task</DialogTitle>
 			<DialogContent>
 				<TextField
+					error={textError}
 					label="Text"
+					required
 					className={classes.input}
 					value={text}
 					onChange={event => setText(event.target.value)}
+					onFocus={() => setTextError(false)}
 					autoFocus
 				/>
 				<FormControl className={classes.input}>
@@ -102,7 +117,7 @@ function TaskDialog(props: Props) {
 					onChange={(_, value) => setProjects(value)}
 					options={[...allProjects]}
 					renderInput={params => (
-						<TextField {...params} label="Projects" />
+						<TextField {...params} label="Projects" helperText="Press Enter to create new projects" />
 					)}
 				/>
 				<Autocomplete
@@ -113,7 +128,7 @@ function TaskDialog(props: Props) {
 					onChange={(_, value) => setContexts(value)}
 					options={[...allContexts]}
 					renderInput={params => (
-						<TextField {...params} label="Contexts" />
+						<TextField {...params} label="Contexts" helperText="Press Enter to create new contexts" />
 					)}
 				/>
 			</DialogContent>
@@ -124,7 +139,7 @@ function TaskDialog(props: Props) {
 				<Button onClick={reset}>
 					Reset
 				</Button>
-				<Button color="primary">
+				<Button color="primary" onClick={submit}>
 					Submit
 				</Button>
 			</DialogActions>
