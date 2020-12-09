@@ -64,7 +64,22 @@ function TodoList(props: Props) {
 				searchFieldAlignment: "left"
 			}}
 			columns={[
-				{ title: "P", field: "priority" },
+				{
+					title: "P",
+					field: "priority",
+					defaultSort: "asc",
+					customSort(a, b) {
+						if (a === null)
+							return -1;
+						if (b === null)
+							return 1;
+						if (a < b)
+							return -1;
+						else if (a > b)
+							return 1;
+						return 0;
+					}
+				},
 				{
 					title: "Date",
 					field: "date",
