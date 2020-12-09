@@ -15,7 +15,7 @@ export function getProjects(tasks: TodoTxtItem[]) {
 
 export function getContexts(tasks: TodoTxtItem[]) {
   return tasks.reduce((contexts: Set<string>, task: TodoTxtItem) => {
-    task.projects?.forEach(ctx => {
+    task.contexts?.forEach(ctx => {
       contexts.add(ctx);
     });
     return contexts;
