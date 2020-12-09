@@ -1,26 +1,26 @@
 declare module "jstodotxt" {
 	export declare class TodoTxtExtension {
-		constructor(name: string?);
+		constructor(name?: string);
 		parsingFunction(line: string);
 	};
 
 	export declare class TodoTxtItem {
 		text: string;
-		priority: string;
+		priority: string?;
 		complete: boolean;
-		completed: Date;
-		date: Date;
-		contexts: string[];
-		projects: string[];
+		completed: Date?;
+		date: Date?;
+		contexts: string[]?;
+		projects: string[]?;
 
-		constructor(text: string?, extensions: TodoTxtExtension[]?);
+		constructor(text?: string, extensions?: TodoTxtExtension[]);
 		toString(): string;
-		parse(text: string?): void;
+		parse(text?: string): void;
 	};
 
 	export type TodoTxt = {
-		parse(textBlock: string?): TodoTxtItem[];
-		parseLine(text: string?): TodoTxtItem;
+		parse(textBlock?: string): TodoTxtItem[];
+		parseLine(text?: string): TodoTxtItem;
 		render(items: TodoTxtItem[]): string;
 		renderItem(item: TodoTxtItem): string;
 	};
