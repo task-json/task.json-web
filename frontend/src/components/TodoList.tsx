@@ -1,5 +1,5 @@
 import MaterialTable from "material-table";
-import { forwardRef } from "react";
+import { forwardRef, Fragment } from "react";
 import {
 	AddBox,
 	Check,
@@ -19,7 +19,7 @@ import {
 	Add
 } from "@material-ui/icons"
 import { green } from "@material-ui/core/colors"
-import { makeStyles } from "@material-ui/core";
+import { Chip, makeStyles } from "@material-ui/core";
 import { TodoTxtItem } from "jstodotxt";
 import { format } from "date-fns";
 
@@ -48,9 +48,12 @@ interface Props {
 	data: TodoTxtItem[]
 }
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
 	add: {
 		color: green[500]
+	},
+	chip: {
+		marginRight: theme.spacing(1)
 	}
 }));
 
@@ -90,8 +93,28 @@ function TodoList(props: Props) {
 					)
 				},
 				{ title: "Text", field: "text" },
-				{ title: "Projects", field: "projects" },
-				{ title: "Contexts", field: "contexts" }
+				{
+					title: "Projects",
+					field: "projects",
+					render: row => (
+						<Fragment>
+							{row.projects?.map(proj => (
+								<Chip className={classes.chip} label={proj} key={proj} />
+							))}
+						</Fragment>
+					)
+				},
+				{
+					title: "Contexts",
+					field: "contexts",
+					render: row => (
+						<Fragment>
+							{row.contexts?.map(ctx => (
+								<Chip className={classes.chip} label={ctx} key={ctx} />
+							))}
+						</Fragment>
+					)
+				}
 			]}
 			data={props.data}
 			icons={tableIcons as any}
