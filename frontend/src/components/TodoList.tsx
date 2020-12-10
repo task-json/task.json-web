@@ -83,15 +83,6 @@ function TodoList(props: Props) {
 						return 0;
 					}
 				},
-				{
-					title: "Date",
-					field: "date",
-					render: row => (
-						<span>
-							{row.date && format(row.date, "yyyy-MM-dd")}
-						</span>
-					)
-				},
 				{ title: "Text", field: "text" },
 				{
 					title: "Projects",
@@ -113,6 +104,15 @@ function TodoList(props: Props) {
 								<Chip className={classes.chip} label={ctx} key={ctx} />
 							))}
 						</Fragment>
+					)
+				},
+				{
+					title: "Date",
+					field: "date",
+					render: row => (
+						<span>
+							{row.date && format(row.date, "yyyy-MM-dd")}
+						</span>
 					)
 				}
 			]}
