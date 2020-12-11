@@ -53,7 +53,9 @@ const useStyles = makeStyles(theme => ({
 		color: green[500]
 	},
 	chip: {
-		marginRight: theme.spacing(1)
+		marginRight: theme.spacing(1),
+		marginTop: theme.spacing(0.5),
+		marginBottom: theme.spacing(0.5)
 	}
 }));
 
@@ -83,10 +85,19 @@ function TodoList(props: Props) {
 						return 0;
 					}
 				},
-				{ title: "Text", field: "text" },
+				{
+					title: "Text",
+					field: "text",
+					cellStyle: {
+						width: "60%"
+					}
+				},
 				{
 					title: "Projects",
 					field: "projects",
+					cellStyle: {
+						width: "20%"
+					},
 					render: row => (
 						<Fragment>
 							{row.projects?.map(proj => (
@@ -98,6 +109,9 @@ function TodoList(props: Props) {
 				{
 					title: "Contexts",
 					field: "contexts",
+					cellStyle: {
+						width: "20%"
+					},
 					render: row => (
 						<Fragment>
 							{row.contexts?.map(ctx => (
