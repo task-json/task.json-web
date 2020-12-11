@@ -1,47 +1,10 @@
-import MaterialTable from "material-table";
-import { forwardRef, Fragment } from "react";
-import {
-	AddBox,
-	Check,
-	Clear,
-	DeleteOutline,
-	ChevronRight,
-	Edit,
-	ChevronLeft,
-	Search,
-	ArrowDownward,
-	Remove,
-	ViewColumn,
-	FirstPage,
-	LastPage,
-	SaveAlt,
-	FilterList,
-	Add
-} from "@material-ui/icons"
+import { Fragment } from "react";
 import { green } from "@material-ui/core/colors"
-import { Chip, makeStyles } from "@material-ui/core";
+import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
 import { TodoTxtItem } from "jstodotxt";
 import { format } from "date-fns";
-
-const tableIcons = {
-	Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
-	Check: forwardRef((props: any, ref: any) => <Check {...props} ref={ref} />),
-	Clear: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
-	Delete: forwardRef((props: any, ref: any) => <DeleteOutline {...props} ref={ref} />),
-	DetailPanel: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
-	Edit: forwardRef((props: any, ref: any) => <Edit {...props} ref={ref} />),
-	Export: forwardRef((props: any, ref: any) => <SaveAlt {...props} ref={ref} />),
-	Filter: forwardRef((props: any, ref: any) => <FilterList {...props} ref={ref} />),
-	FirstPage: forwardRef((props: any, ref: any) => <FirstPage {...props} ref={ref} />),
-	LastPage: forwardRef((props: any, ref: any) => <LastPage {...props} ref={ref} />),
-	NextPage: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
-	PreviousPage: forwardRef((props: any, ref: any) => <ChevronLeft {...props} ref={ref} />),
-	ResetSearch: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
-	Search: forwardRef((props: any, ref: any) => <Search {...props} ref={ref} />),
-	SortArrow: forwardRef((props: any, ref: any) => <ArrowDownward {...props} ref={ref} />),
-	ThirdStateCheck: forwardRef((props: any, ref: any) => <Remove {...props} ref={ref} />),
-	ViewColumn: forwardRef((props: any, ref: any) => <ViewColumn {...props} ref={ref} />)
-};
+import MUIDataTable from "mui-datatables";
+import { Plus as PlusIcon } from "mdi-material-ui";
 
 interface Props {
 	onAdd: () => void,
@@ -50,7 +13,9 @@ interface Props {
 
 const useStyles = makeStyles(theme => ({
 	add: {
-		color: green[500]
+		"&:hover": {
+			color: green[500]
+		}
 	},
 	chip: {
 		marginRight: theme.spacing(1),
@@ -59,87 +24,117 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
+
+interface CustomToolbarProps {
+	onAdd: () => void
+};
+
+// The actions are appended to the original toolbar actions
+const CustomToolbar = (props: CustomToolbarProps) => {
+	const classes = useStyles();
+
+	return (
+		<Tooltip title="Add Task">
+			<IconButton className={classes.add} onClick={props.onAdd}>
+				<PlusIcon />
+			</IconButton>
+		</Tooltip>
+	);
+};
+
 function TodoList(props: Props) {
 	const classes = useStyles();
 
 	return (
-		<MaterialTable
+		<MUIDataTable
+			title=""
 			options={{
-				showTitle: false,
-				searchFieldAlignment: "left"
+				print: false,
+				download: false,
+				customToolbar: () => {
+					return <CustomToolbar onAdd={props.onAdd} />
+				}
 			}}
 			columns={[
 				{
-					title: "P",
-					field: "priority",
-					defaultSort: "asc",
-					customSort(a, b) {
-						if (a === null)
-							return -1;
-						if (b === null)
-							return 1;
-						if (a < b)
-							return -1;
-						else if (a > b)
-							return 1;
-						return 0;
+					name: "priority",
+					label: "P",
+					options: {
+						sortCompare(order) {
+							return (obj1, obj2) => {
+								const a: string = obj1.data;
+								const b: string = obj2.data;
+								let result = 0;
+								if (a === null)
+									result = -1;
+								if (b === null)
+									result = 1;
+								if (a < b)
+									result = 1;
+								else if (a > b)
+									result = -1;
+
+								return result * (order === "asc" ? 1 : -1);
+							};
+						}
 					}
 				},
 				{
-					title: "Text",
-					field: "text",
-					cellStyle: {
-						width: "60%"
+					name: "text",
+					label: "Text",
+					// cellStyle: {
+					// 	width: "60%"
+					// }
+				},
+				{
+					name: "projects",
+					label: "Projects",
+					options: {
+						customBodyRenderLite: index => (
+							<Fragment>
+								{props.data[index].projects?.map(proj => (
+									<Chip className={classes.chip} label={proj} key={proj} />
+								))}
+							</Fragment>
+						)
 					}
+					// cellStyle: {
+					// 	width: "20%"
+					// },
 				},
 				{
-					title: "Projects",
-					field: "projects",
-					cellStyle: {
-						width: "20%"
-					},
-					render: row => (
-						<Fragment>
-							{row.projects?.map(proj => (
-								<Chip className={classes.chip} label={proj} key={proj} />
-							))}
-						</Fragment>
-					)
+					name: "contexts",
+					label: "Contexts",
+					options: {
+						customBodyRenderLite: index => (
+							<Fragment>
+								{props.data[index].contexts?.map(ctx => (
+									<Chip className={classes.chip} label={ctx} key={ctx} />
+								))}
+							</Fragment>
+						)
+					}
+					// cellStyle: {
+					// 	width: "20%"
+					// },
 				},
 				{
-					title: "Contexts",
-					field: "contexts",
-					cellStyle: {
-						width: "20%"
-					},
-					render: row => (
-						<Fragment>
-							{row.contexts?.map(ctx => (
-								<Chip className={classes.chip} label={ctx} key={ctx} />
-							))}
-						</Fragment>
-					)
-				},
-				{
-					title: "Date",
-					field: "date",
-					render: row => (
-						<span>
-							{row.date && format(row.date, "yyyy-MM-dd")}
-						</span>
-					)
+					name: "date",
+					label: "Date",
+					options: {
+						customBodyRender: (row: Date | null) => row && format(row, "yyyy-MM-dd")
+					}
 				}
 			]}
 			data={props.data}
-			icons={tableIcons as any}
-			actions={[
-				{
-					icon: () => <Add className={classes.add} />,
-					tooltip: "Add Task",
-					isFreeAction: true,
-					onClick: props.onAdd
-				}
-			]}
+			// actions={[
+			// 	{
+			// 		icon: () => <Add className={classes.add} />,
+			// 		tooltip: "Add Task",
+			// 		isFreeAction: true,
+			// 		onClick: props.onAdd
+			// 	}
+			// ]}
 		/>
 	);
 }
