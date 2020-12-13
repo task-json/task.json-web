@@ -16,6 +16,7 @@ import {
 	Cog,
 	StickerCheckOutline
 } from "mdi-material-ui";
+import SettingsDialog from "./SettingsDialog";
 
 type Props = {
 	children?: any
@@ -34,6 +35,7 @@ function Layout(props: Props) {
 	const classes = useStyles();
 	const notifications = useSelector((state: RootState) => state.notifications)
 	const dispatch = useDispatch();
+  const [settingsDialog, setSettingsDialog] = useState(false);
 
 	// To-be-removed notifications
 	const [invalidNotifications, setInvalidNotifications] = useState([] as string[]);
@@ -59,11 +61,20 @@ function Layout(props: Props) {
 						Todo.txt WebUI
 					</Typography>
 
-					<IconButton color="inherit" title="Settings">
+					<IconButton
+						color="inherit"
+						title="Settings"
+						onClick={() => setSettingsDialog(true)}
+					>
 						<Cog />
 					</IconButton>
 				</Toolbar>
 			</AppBar>
+
+      <SettingsDialog
+        open={settingsDialog}
+        onClose={() => setSettingsDialog(false)}
+      />
 
 			{notifications.map(notification => (
 				<Snackbar
