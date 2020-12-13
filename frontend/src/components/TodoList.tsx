@@ -82,14 +82,15 @@ function TodoList(props: Props) {
 				{
 					name: "text",
 					label: "Text",
-					// cellStyle: {
-					// 	width: "60%"
-					// }
+					options: {
+						filterType: "textField"
+					}
 				},
 				{
 					name: "projects",
 					label: "Projects",
 					options: {
+						filterType: "multiselect",
 						customBodyRenderLite: index => (
 							<Fragment>
 								{props.data[index].projects?.map(proj => (
@@ -98,14 +99,12 @@ function TodoList(props: Props) {
 							</Fragment>
 						)
 					}
-					// cellStyle: {
-					// 	width: "20%"
-					// },
 				},
 				{
 					name: "contexts",
 					label: "Contexts",
 					options: {
+						filterType: "multiselect",
 						customBodyRenderLite: index => (
 							<Fragment>
 								{props.data[index].contexts?.map(ctx => (
@@ -114,14 +113,12 @@ function TodoList(props: Props) {
 							</Fragment>
 						)
 					}
-					// cellStyle: {
-					// 	width: "20%"
-					// },
 				},
 				{
 					name: "date",
 					label: "Date",
 					options: {
+						filterType: "textField",
 						customBodyRender: (row: Date | null) => row && format(row, "yyyy-MM-dd")
 					}
 				}
