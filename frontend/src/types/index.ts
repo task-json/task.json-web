@@ -5,3 +5,7 @@ export type Notification = {
 	severity: Severity,
 	text: string
 };
+
+export type Settings = {
+	maxPriorities: number
+};

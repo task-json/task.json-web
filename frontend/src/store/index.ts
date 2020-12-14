@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { Notification } from "../types";
+import { Notification, Settings } from "../types";
 import axios from "axios";
 import _ from "lodash";
 
@@ -14,7 +14,10 @@ const rootSlice = createSlice({
 	initialState: {
 		tasks: [] as string[],
 		notifications: [] as Notification[],
-		loading: false
+		loading: false,
+		settings: {
+			maxPriorities: 3
+		} as Settings
 	},
 	reducers: {
 		addNotification(state, action: PayloadAction<Notification>) {
@@ -40,6 +43,12 @@ const rootSlice = createSlice({
 			const { index, task } = action.payload;
 			state.tasks[index] = task;
 		},
+		updateSettings(state, action: PayloadAction<Settings>) {
+			state.settings = { ...action.payload };
+		},
+		updateMaxPriorities(state, action: PayloadAction<number>) {
+			state.settings.maxPriorities = action.payload;
+		}
 	},
 	extraReducers(builder) {
 		builder.addCase(getTasks.pending, state => {
