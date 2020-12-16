@@ -73,7 +73,7 @@ const rootSlice = createSlice({
 });
 
 const loadState = () => {
-	const serializedState = localStorage.getItem("todo.txt");
+	const serializedState = localStorage.getItem("todo.json");
 	if (serializedState === null)
 		return undefined;
 	return {
@@ -85,7 +85,7 @@ const loadState = () => {
 const saveState = (state: object) => {
 	try {
 		const serializedState = JSON.stringify(state);
-		localStorage.setItem("todo.txt", serializedState);
+		localStorage.setItem("todo.json", serializedState);
 	}
 	catch (err) {
 		console.error(err);
