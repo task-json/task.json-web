@@ -9,16 +9,18 @@ const getTasks = createAsyncThunk("getTasks", async () => {
 	return response.data as string[];
 });
 
+const initialState = {
+	tasks: [] as string[],
+	notifications: [] as Notification[],
+	loading: false,
+	settings: {
+		maxPriorities: 3
+	} as Settings
+};
+
 const rootSlice = createSlice({
 	name: "app",
-	initialState: {
-		tasks: [] as string[],
-		notifications: [] as Notification[],
-		loading: false,
-		settings: {
-			maxPriorities: 3
-		} as Settings
-	},
+	initialState,
 	reducers: {
 		addNotification(state, action: PayloadAction<Notification>) {
 			state.notifications.push({
@@ -69,9 +71,41 @@ const rootSlice = createSlice({
 	}
 });
 
+const loadState = () => {
+	const serializedState = localStorage.getItem("todo.txt");
+	if (serializedState === null)
+		return undefined;
+	return {
+		...initialState,
+		...JSON.parse(serializedState)
+	};
+};
+
+const saveState = (state: object) => {
+	try {
+		const serializedState = JSON.stringify(state);
+		localStorage.setItem("todo.txt", serializedState);
+	}
+	catch (err) {
+		console.error(err);
+	}
+}
+
+// Load state
+const persistedState = loadState();
 const store = configureStore({
-	reducer: rootSlice.reducer
+	reducer: rootSlice.reducer,
+	preloadedState: persistedState
 });
+
+// Save state
+store.subscribe(_.throttle(() => {
+	const state = store.getState();
+	saveState({
+		settings: state.settings,
+		tasks: state.tasks,
+	});
+}, 1000));
 
 export default store;
 
