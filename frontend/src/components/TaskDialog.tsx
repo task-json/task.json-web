@@ -16,14 +16,15 @@ import {
 } from "@material-ui/pickers";
 import { Autocomplete } from "@material-ui/lab";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, rootActions } from "../store";
-import { getContexts, getProjects, parseTasks } from "../utils/tasks";
-import { TodoTxtItem } from "jstodotxt";
+import { useDispatch } from "react-redux";
+import { rootActions } from "../store";
+import { Task } from "../types";
+import { initTask, getContexts, getProjects } from "../utils/task";
 
 interface Props {
 	open: boolean,
-	onClose: () => void
+	onClose: () => void,
+	tasks: Task[]
 }
 
 const useStyles = makeStyles(theme => ({
@@ -35,30 +36,29 @@ const useStyles = makeStyles(theme => ({
 
 function TaskDialog(props: Props) {
 	const classes = useStyles();
-	const [text, setText] = useState("");
-	const [priority, setPriority] = useState("");
-	const [projects, setProjects] = useState([] as string[]);
-	const [contexts, setContexts] = useState([] as string[]);
-	const [date, setDate] = useState<Date | null>(null);
+	const [task, setTask] = useState(initTask());
 	const dispatch = useDispatch();
 	
 	// Error states
 	const [textError, setTextError] = useState(false);
 
-	const tasks = useSelector((state: RootState) => parseTasks(state.tasks));
+	const tasks = props.tasks;
 	const allProjects = getProjects(tasks);
 	const allContexts = getContexts(tasks);
 
 	const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 	const reset = () => {
-		setText("");
-		setPriority("");
-		setDate(null);
-		setProjects([]);
-		setContexts([]);
+		setTask(initTask());
 
 		setTextError(false);
+	};
+
+	const setTaskField = (field: keyof Task, value: any) => {
+		setTask({
+			...task,
+			[field]: value
+		});
 	};
 
 	const handleClose = () => {
@@ -67,18 +67,12 @@ function TaskDialog(props: Props) {
 	};
 
 	const submit = () => {
-		const error = text.length === 0;
+		const error = task.text.length === 0;
 		if (error) {
 			setTextError(error);
 			return;
 		}
-		const task = new TodoTxtItem();
-		task.date = date;
-		task.text = text;
-		task.priority = priority.length ? priority : null;
-		task.projects = projects.length ? projects : null;
-		task.contexts = contexts.length ? contexts : null;
-		dispatch(rootActions.addTask(task.toString()));
+		dispatch(rootActions.addTask(task));
 		dispatch(rootActions.addNotification({
 			severity: "success",
 			text: "Successfully add a new task"
@@ -94,8 +88,8 @@ function TaskDialog(props: Props) {
 					label="Text"
 					required
 					className={classes.input}
-					value={text}
-					onChange={event => setText(event.target.value)}
+					value={task.text}
+					onChange={event => setTaskField("text", event.target.value)}
 					onFocus={() => setTextError(false)}
 					autoFocus
 				/>
@@ -103,8 +97,8 @@ function TaskDialog(props: Props) {
 					<InputLabel id="priority-select">Priority</InputLabel>
 					<Select
 						labelId="priority-select"
-						value={priority}
-						onChange={event => setPriority(event.target.value as string)}
+						value={task.priority}
+						onChange={event => setTaskField("priority", event.target.value)}
 					>
 						<MenuItem value={""}>
 							None
@@ -118,17 +112,17 @@ function TaskDialog(props: Props) {
 				</FormControl>
 				<KeyboardDatePicker
 					className={classes.input}
-					label="Date"
+					label="Start Date"
 					format="yyyy-MM-dd"
-					value={date}
-					onChange={value => setDate(value)}
+					value={task.startDate}
+					onChange={(_, value) => setTaskField("startDate", value)}
 				/>
 				<Autocomplete
 					multiple
 					freeSolo
 					className={classes.input}
-					value={projects}
-					onChange={(_, value) => setProjects(value)}
+					value={task.projects}
+					onChange={(_, value) => setTaskField("projects", value)}
 					options={[...allProjects]}
 					renderInput={params => (
 						<TextField {...params} label="Projects" helperText="Press Enter to create new projects" />
@@ -138,8 +132,8 @@ function TaskDialog(props: Props) {
 					multiple
 					freeSolo
 					className={classes.input}
-					value={contexts}
-					onChange={(_, value) => setContexts(value)}
+					value={task.contexts}
+					onChange={(_, value) => setTaskField("contexts", value)}
 					options={[...allContexts]}
 					renderInput={params => (
 						<TextField {...params} label="Contexts" helperText="Press Enter to create new contexts" />

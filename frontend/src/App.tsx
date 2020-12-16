@@ -9,7 +9,6 @@ import {
   makeStyles,
   Typography
 } from '@material-ui/core';
-import { parseTasks } from './utils/tasks';
 
 const useStyles = makeStyles(theme => ({
   head: {
@@ -23,7 +22,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function App() {
-  const tasks = useSelector((state: RootState) => parseTasks(state.tasks));
+  const tasks = useSelector((state: RootState) => state.tasks);
   const classes = useStyles();
   const [taskDialog, setTaskDialog] = useState(false);
 
@@ -32,6 +31,7 @@ function App() {
       <TaskDialog
         open={taskDialog}
         onClose={() => setTaskDialog(false)}
+        tasks={tasks}
       />
 
       <Container>

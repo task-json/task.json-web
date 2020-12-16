@@ -9,3 +9,13 @@ export type Notification = {
 export type Settings = {
 	maxPriorities: number
 };
+
+export type Task = {
+	text: string,
+	priority: string,
+	done: boolean,
+	startDate: string | null,
+	endDate: string | null,
+	contexts: string[],
+	projects: string[]
+};

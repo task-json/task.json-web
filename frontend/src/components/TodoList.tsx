@@ -1,14 +1,14 @@
 import { Fragment } from "react";
 import { green } from "@material-ui/core/colors"
 import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
-import { TodoTxtItem } from "jstodotxt";
 import { format } from "date-fns";
 import MUIDataTable from "mui-datatables";
 import { Plus as PlusIcon } from "mdi-material-ui";
+import { Task } from "../types";
 
 interface Props {
 	onAdd: () => void,
-	data: TodoTxtItem[]
+	data: Task[]
 }
 
 const useStyles = makeStyles(theme => ({
