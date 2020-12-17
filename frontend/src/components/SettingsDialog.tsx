@@ -13,6 +13,7 @@ import {
 } from "@material-ui/core";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import FileSaver from "file-saver";
 import { RootState, rootActions } from "../store";
 
 interface Props {
@@ -28,15 +29,15 @@ const useStyles = makeStyles(() => ({
 
 function SettingsDialog(props: Props) {
 	const classes = useStyles();
-	const settings = useSelector((state: RootState) => state.settings);
+	const rootState = useSelector((state: RootState) => state);
 	const dispatch = useDispatch();
 
 	// Local states
-	const [maxPriorities, setMaxPriorities] = useState(settings.maxPriorities.toString());
+	const [maxPriorities, setMaxPriorities] = useState(rootState.settings.maxPriorities.toString());
 	const [errorPriorities, setErrorPriorities] = useState(false);
 
 	const reset = () => {
-		setMaxPriorities(settings.maxPriorities.toString());
+		setMaxPriorities(rootState.settings.maxPriorities.toString());
 	};
 
 	const save = () => {
@@ -44,6 +45,13 @@ function SettingsDialog(props: Props) {
 			dispatch(rootActions.updateMaxPriorities(parseInt(maxPriorities)));
 			props.onClose();
 		}
+	};
+
+	const exportData = () => {
+		const blob = new Blob([JSON.stringify(rootState.tasks, null, 2)], {
+			type: "text/plain;charset=utf-8"
+		});
+		FileSaver.saveAs(blob, "todo.json");
 	};
 
 	return (
@@ -80,6 +88,24 @@ function SettingsDialog(props: Props) {
 										setMaxPriorities(value);
 									}}
 								/>
+							</Grid>
+						</Grid>
+					</ListItem>
+					<ListItem>
+						<Grid container justify="space-between" alignItems="center">
+							<Grid item>
+								<ListItemText secondary="JSON format">
+									Export data
+								</ListItemText>
+							</Grid>
+							<Grid item>
+								<Button
+									variant="contained"
+									color="secondary"
+									onClick={exportData}
+								>
+									Export
+								</Button>
 							</Grid>
 						</Grid>
 					</ListItem>
