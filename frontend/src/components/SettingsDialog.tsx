@@ -21,9 +21,12 @@ interface Props {
 	onClose: () => void
 }
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
 	action: {
 		maxWidth: "45px"
+	},
+	dataButton: {
+		marginLeft: theme.spacing(1.5)
 	}
 }));
 
@@ -45,6 +48,22 @@ function SettingsDialog(props: Props) {
 			dispatch(rootActions.updateMaxPriorities(parseInt(maxPriorities)));
 			props.onClose();
 		}
+	};
+
+	const importData = (files: FileList | null) => {
+		if (!files?.length)
+			return;
+		
+		const reader = new FileReader();
+		reader.onload = () => {
+			const tasks = JSON.parse(reader.result as string);
+			dispatch(rootActions.setTasks(tasks));
+			dispatch(rootActions.addNotification({
+				severity: "success",
+				text: "Data imported successfully"
+			}));
+		};
+		reader.readAsText(files[0]);
 	};
 
 	const exportData = () => {
@@ -94,15 +113,32 @@ function SettingsDialog(props: Props) {
 					<ListItem>
 						<Grid container justify="space-between" alignItems="center">
 							<Grid item>
-								<ListItemText secondary="JSON format">
-									Export data
+								<ListItemText secondary="todo.json">
+									JSON data
 								</ListItemText>
 							</Grid>
 							<Grid item>
+								<input
+									id="import-data-input"
+									style={{ display: "none" }}
+									type="file"
+									onChange={event => importData(event.target.files)}
+								/>
+								<label htmlFor="import-data-input">
+									<Button
+										variant="contained"
+										color="primary"
+										className={classes.dataButton}
+										component="span"
+									>
+										Import
+									</Button>
+								</label>
 								<Button
 									variant="contained"
 									color="secondary"
 									onClick={exportData}
+									className={classes.dataButton}
 								>
 									Export
 								</Button>

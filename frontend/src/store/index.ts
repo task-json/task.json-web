@@ -46,6 +46,9 @@ const rootSlice = createSlice({
 			const { index, task } = action.payload;
 			state.tasks[index] = task;
 		},
+		setTasks(state, action: PayloadAction<Task[]>) {
+			state.tasks = [...action.payload];
+		},
 		updateSettings(state, action: PayloadAction<Settings>) {
 			state.settings = { ...action.payload };
 		},
