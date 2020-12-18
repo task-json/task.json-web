@@ -16,8 +16,8 @@ import {
 } from "@material-ui/pickers";
 import { Autocomplete } from "@material-ui/lab";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { rootActions } from "../store";
+import { useDispatch, useSelector } from "react-redux";
+import { rootActions, RootState } from "../store";
 import { Task } from "../types";
 import { initTask, getContexts, getProjects } from "../utils/task";
 
@@ -38,6 +38,7 @@ function TaskDialog(props: Props) {
 	const classes = useStyles();
 	const [task, setTask] = useState(initTask());
 	const dispatch = useDispatch();
+	const maxPriorities = useSelector((state: RootState) => state.settings.maxPriorities);
 	
 	// Error states
 	const [textError, setTextError] = useState(false);
@@ -46,7 +47,9 @@ function TaskDialog(props: Props) {
 	const allProjects = getProjects(tasks);
 	const allContexts = getContexts(tasks);
 
-	const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+	const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		.substr(0, maxPriorities)
+		.split("");
 
 	const reset = () => {
 		setTask(initTask());
