@@ -67,7 +67,16 @@ function SettingsDialog(props: Props) {
 	};
 
 	const exportData = () => {
-		const blob = new Blob([JSON.stringify(rootState.tasks, null, 2)], {
+		const data = "[\n\t"
+			+ rootState.tasks
+				.map(task => (
+					"[" + task.map(field => JSON.stringify(field))
+						.join(", ") + "]"
+				))
+				.join(",\n\t")
+			+ "\n]";
+
+		const blob = new Blob([data], {
 			type: "text/plain;charset=utf-8"
 		});
 		FileSaver.saveAs(blob, "todo.json");
