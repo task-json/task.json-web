@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import MUIDataTable from "mui-datatables";
 import { Plus as PlusIcon } from "mdi-material-ui";
 import { Task } from "../types";
-import { CTX, PROJ } from "../utils/task";
 
 interface Props {
 	onAdd: () => void,
@@ -58,13 +57,8 @@ function TodoList(props: Props) {
 			}}
 			columns={[
 				{
-					name: "Done",
-					options: {
-						display: false
-					}
-				},
-				{
-					name: "Pri",
+					name: "priority",
+					label: "P",
 					options: {
 						sortCompare(order) {
 							return (obj1, obj2) => {
@@ -86,18 +80,20 @@ function TodoList(props: Props) {
 					}
 				},
 				{
-					name: "Text",
+					name: "text",
+					label: "Text",
 					options: {
 						filterType: "textField"
 					}
 				},
 				{
-					name: "Projects",
+					name: "projects",
+					label: "Projects",
 					options: {
 						filterType: "multiselect",
 						customBodyRenderLite: index => (
 							<Fragment>
-								{props.data[index][PROJ].map(proj => (
+								{props.data[index].projects?.map(proj => (
 									<Chip className={classes.chip} label={proj} key={proj} />
 								))}
 							</Fragment>
@@ -105,12 +101,13 @@ function TodoList(props: Props) {
 					}
 				},
 				{
-					name: "Contexts",
+					name: "contexts",
+					label: "Contexts",
 					options: {
 						filterType: "multiselect",
 						customBodyRenderLite: index => (
 							<Fragment>
-								{props.data[index][CTX].map(ctx => (
+								{props.data[index].contexts?.map(ctx => (
 									<Chip className={classes.chip} label={ctx} key={ctx} />
 								))}
 							</Fragment>
@@ -118,13 +115,23 @@ function TodoList(props: Props) {
 					}
 				},
 				{
-					name: "Start",
+					name: "date",
+					label: "Date",
 					options: {
-						filterType: "textField"
+						filterType: "textField",
+						customBodyRender: (row: Date | null) => row && format(row, "yyyy-MM-dd")
 					}
 				}
 			]}
 			data={props.data}
+			// actions={[
+			// 	{
+			// 		icon: () => <Add className={classes.add} />,
+			// 		tooltip: "Add Task",
+			// 		isFreeAction: true,
+			// 		onClick: props.onAdd
+			// 	}
+			// ]}
 		/>
 	);
 }

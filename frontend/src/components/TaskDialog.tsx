@@ -19,7 +19,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { rootActions, RootState } from "../store";
 import { Task } from "../types";
-import { initTask, getContexts, getProjects, TEXT, PRI, START, PROJ, CTX } from "../utils/task";
+import { initTask, getContexts, getProjects } from "../utils/task";
 
 interface Props {
 	open: boolean,
@@ -57,10 +57,11 @@ function TaskDialog(props: Props) {
 		setTextError(false);
 	};
 
-	const setTaskField = (field: 0 | 1 | 2 | 3 | 4 | 5 | 6, value: any) => {
-		let tmpTask: Task = [...task];
-		tmpTask[field] = value as never;
-		setTask(tmpTask);
+	const setTaskField = (field: keyof Task, value: any) => {
+		setTask({
+			...task,
+			[field]: value
+		});
 	};
 
 	const handleClose = () => {
@@ -69,7 +70,7 @@ function TaskDialog(props: Props) {
 	};
 
 	const submit = () => {
-		const error = task[TEXT].length === 0;
+		const error = task.text.length === 0;
 		if (error) {
 			setTextError(error);
 			return;
@@ -90,8 +91,8 @@ function TaskDialog(props: Props) {
 					label="Text"
 					required
 					className={classes.input}
-					value={task[TEXT]}
-					onChange={event => setTaskField(TEXT, event.target.value)}
+					value={task.text}
+					onChange={event => setTaskField("text", event.target.value)}
 					onFocus={() => setTextError(false)}
 					autoFocus
 				/>
@@ -99,8 +100,8 @@ function TaskDialog(props: Props) {
 					<InputLabel id="priority-select">Priority</InputLabel>
 					<Select
 						labelId="priority-select"
-						value={task[PRI]}
-						onChange={event => setTaskField(PRI, event.target.value)}
+						value={task.priority}
+						onChange={event => setTaskField("priority", event.target.value)}
 					>
 						<MenuItem value={""}>
 							None
@@ -116,15 +117,15 @@ function TaskDialog(props: Props) {
 					className={classes.input}
 					label="Start Date"
 					format="yyyy-MM-dd"
-					value={task[START]}
-					onChange={(_, value) => setTaskField(START, value)}
+					value={task.startDate}
+					onChange={(_, value) => setTaskField("startDate", value)}
 				/>
 				<Autocomplete
 					multiple
 					freeSolo
 					className={classes.input}
-					value={task[PROJ]}
-					onChange={(_, value) => setTaskField(PROJ, value)}
+					value={task.projects}
+					onChange={(_, value) => setTaskField("projects", value)}
 					options={[...allProjects]}
 					renderInput={params => (
 						<TextField {...params} label="Projects" helperText="Press Enter to create new projects" />
@@ -134,8 +135,8 @@ function TaskDialog(props: Props) {
 					multiple
 					freeSolo
 					className={classes.input}
-					value={task[CTX]}
-					onChange={(_, value) => setTaskField(CTX, value)}
+					value={task.contexts}
+					onChange={(_, value) => setTaskField("contexts", value)}
 					options={[...allContexts]}
 					renderInput={params => (
 						<TextField {...params} label="Contexts" helperText="Press Enter to create new contexts" />
