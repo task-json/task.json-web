@@ -117,8 +117,8 @@ function TaskDialog(props: Props) {
 					className={classes.input}
 					label="Start Date"
 					format="yyyy-MM-dd"
-					value={task.startDate}
-					onChange={(_, value) => setTaskField("startDate", value)}
+					value={task.start}
+					onChange={(_, value) => setTaskField("start", value)}
 				/>
 				<Autocomplete
 					multiple

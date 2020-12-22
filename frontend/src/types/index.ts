@@ -11,11 +11,12 @@ export type Settings = {
 };
 
 export type Task = {
-	text: string,
-	priority: string,
-	done: boolean,
-	startDate: string | null,
-	endDate: string | null,
-	contexts: string[],
-	projects: string[]
+	text: string;
+	priority: string;
+	done: boolean;
+	contexts: string[];
+	projects: string[];
+	due: string | null;
+	start: string | null;
+	end: string | null;
 };

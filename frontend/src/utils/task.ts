@@ -5,10 +5,11 @@ export const initTask = () => ({
 	text: "",
 	priority: "",
 	done: false,
-	startDate: format(new Date(), "yyyy-MM-dd"),
-	endDate: null,
 	contexts: [],
-	projects: []
+  projects: [],
+  due: null,
+	start: format(new Date(), "yyyy-MM-dd"),
+	end: null
 } as Task);
 
 export function getProjects(tasks: Task[]) {
