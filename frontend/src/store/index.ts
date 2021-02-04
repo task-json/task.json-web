@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { Notification, Settings, Task } from "../types";
+import { Notification, Settings } from "../types";
+import { Task } from "todo.json";
 import axios from "axios";
 import _ from "lodash";
 

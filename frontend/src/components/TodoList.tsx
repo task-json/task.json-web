@@ -4,7 +4,7 @@ import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
 import { format } from "date-fns";
 import MUIDataTable from "mui-datatables";
 import { Plus as PlusIcon } from "mdi-material-ui";
-import { Task } from "../types";
+import { Task } from "todo.json";
 
 interface Props {
 	onAdd: () => void,

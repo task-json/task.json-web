@@ -18,7 +18,7 @@ import { Autocomplete } from "@material-ui/lab";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { rootActions, RootState } from "../store";
-import { Task } from "../types";
+import { Task } from "todo.json";
 import { initTask, getContexts, getProjects } from "../utils/task";
 
 interface Props {
