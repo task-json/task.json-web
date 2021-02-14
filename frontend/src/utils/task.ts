@@ -1,26 +1,23 @@
-import { Task } from "todo.json";
-import { format } from "date-fns";
+import { TaskJson, Task, TaskType } from "task.json";
+import { v4 as uuidv4 } from "uuid";
 
-export const initTask = () => ({
+export const initTask = (): Task => ({
+  uuid: uuidv4(),
 	text: "",
-	start: format(new Date(), "yyyy-MM-dd")
-} as Task);
+  start: new Date().toISOString(),
+  modified: new Date().toISOString()
+});
 
-export function getProjects(tasks: Task[]) {
-  return tasks.reduce((projects: Set<string>, task: Task) => {
-    task.projects?.forEach(proj => {
-      projects.add(proj);
-    });
-    return projects;
-  }, new Set());
+export function getFieldValues(taskJson: TaskJson, field: "projects" | "contexts") {
+  const values: Set<string> = new Set();
+  const types: TaskType[] = ["todo", "done"];
+
+  for (const type of types) {
+    for (const task of taskJson[type]) {
+      task[field]?.forEach(value => {
+        values.add(value);
+      });
+    }
+  }
+  return values;
 }
-
-export function getContexts(tasks: Task[]) {
-  return tasks.reduce((contexts: Set<string>, task: Task) => {
-    task.contexts?.forEach(ctx => {
-      contexts.add(ctx);
-    });
-    return contexts;
-  }, new Set());
-}
-

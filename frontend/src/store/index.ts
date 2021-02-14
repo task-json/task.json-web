@@ -1,18 +1,19 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { Notification, Settings } from "../types";
-import { Task } from "todo.json";
+import { initTaskJson, Task, TaskJson, TaskType } from "task.json";
 import axios from "axios";
 import _ from "lodash";
 
+// FIXME: use task.json-client
 const getTasks = createAsyncThunk("getTasks", async () => {
-	const response = await axios.get("/tasks");
-	const tasks: Task[] = JSON.parse(response.data);
+	const resp = await axios.get("/tasks");
+	const tasks: TaskJson = JSON.parse(resp.data);
 	return tasks;
 });
 
 const initialState = {
-	tasks: [] as Task[],
+	taskJson: initTaskJson(),
 	notifications: [] as Notification[],
 	loading: false,
 	settings: {
@@ -35,23 +36,34 @@ const rootSlice = createSlice({
 			_.remove(state.notifications, e => e.id === action.payload);
 		},
 		addTask(state, action: PayloadAction<Task>) {
-			state.tasks.push(action.payload);
+			state.taskJson.todo.push(action.payload);
 		},
-		removeTask(state, action: PayloadAction<number>) {
-			state.tasks.splice(action.payload, 1);
-		},
-		updateTask(state, action: PayloadAction<{
-			index: number,
-			task: Task
+		removeTask(state, action: PayloadAction<{
+			type: "todo" | "done",
+			uuid: string
 		}>) {
-			const { index, task } = action.payload;
-			state.tasks[index] = task;
+			const date = new Date().toISOString();
+			const { uuid, type } = action.payload;
+			const removedTasks = _.remove(state.taskJson[type], task => task.uuid === uuid)
+				.map(task => {
+					task.modified = date;
+					return task;
+				});
+			state.taskJson.removed.push(...removedTasks);
 		},
-		setTasks(state, action: PayloadAction<Task[]>) {
-			state.tasks = [...action.payload];
+		modifyTask(state, action: PayloadAction<{
+			type: TaskType;
+			task: Task;
+		}>) {
+			const { type, task } = action.payload;
+			const index = state.taskJson[type].findIndex(t => t.uuid === task.uuid);
+			state.taskJson[type][index] = task;
+		},
+		setTaskJson(state, action: PayloadAction<TaskJson>) {
+			state.taskJson = action.payload;
 		},
 		updateSettings(state, action: PayloadAction<Settings>) {
-			state.settings = { ...action.payload };
+			state.settings = action.payload;
 		},
 		updateMaxPriorities(state, action: PayloadAction<number>) {
 			state.settings.maxPriorities = action.payload;
@@ -71,13 +83,13 @@ const rootSlice = createSlice({
 		});
 		builder.addCase(getTasks.fulfilled, (state, action) => {
 			state.loading = false;
-			state.tasks = action.payload;
+			state.taskJson = action.payload;
 		});
 	}
 });
 
 const loadState = () => {
-	const serializedState = localStorage.getItem("todo.json");
+	const serializedState = localStorage.getItem("task.json");
 	if (serializedState === null)
 		return undefined;
 	return {
@@ -89,7 +101,7 @@ const loadState = () => {
 const saveState = (state: object) => {
 	try {
 		const serializedState = JSON.stringify(state);
-		localStorage.setItem("todo.json", serializedState);
+		localStorage.setItem("task.json", serializedState);
 	}
 	catch (err) {
 		console.error(err);
@@ -108,7 +120,7 @@ store.subscribe(_.throttle(() => {
 	const state = store.getState();
 	saveState({
 		settings: state.settings,
-		tasks: state.tasks,
+		taskJson: state.taskJson,
 	});
 }, 1000));
 

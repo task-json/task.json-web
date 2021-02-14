@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import TodoList from "./components/TodoList";
+import TaskList from "./components/TaskList";
 import Layout from "./components/Layout";
 import TaskDialog from "./components/TaskDialog";
 import { useSelector } from 'react-redux';
@@ -22,16 +22,16 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function App() {
-  const tasks = useSelector((state: RootState) => state.tasks);
+  const taskJson = useSelector((state: RootState) => state.taskJson);
   const classes = useStyles();
   const [taskDialog, setTaskDialog] = useState(false);
 
+  // TODO: add buttons to select task type
   return (
     <Layout>
       <TaskDialog
         open={taskDialog}
         onClose={() => setTaskDialog(false)}
-        tasks={tasks}
       />
 
       <Container>
@@ -39,8 +39,8 @@ function App() {
           Tasks
         </Typography>
 
-        <TodoList
-          data={tasks}
+        <TaskList
+          tasks={taskJson.todo}
           onAdd={() => setTaskDialog(true)}
         />
       </Container>

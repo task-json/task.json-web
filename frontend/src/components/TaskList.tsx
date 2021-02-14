@@ -4,11 +4,11 @@ import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
 import { format } from "date-fns";
 import MUIDataTable from "mui-datatables";
 import { Plus as PlusIcon } from "mdi-material-ui";
-import { Task } from "todo.json";
+import { Task } from "task.json";
 
 interface Props {
 	onAdd: () => void,
-	data: Task[]
+	tasks: Task[]
 }
 
 const useStyles = makeStyles(theme => ({
@@ -42,7 +42,7 @@ const CustomToolbar = (props: CustomToolbarProps) => {
 	);
 };
 
-function TodoList(props: Props) {
+function TaskList(props: Props) {
 	const classes = useStyles();
 
 	return (
@@ -93,7 +93,7 @@ function TodoList(props: Props) {
 						filterType: "multiselect",
 						customBodyRenderLite: index => (
 							<Fragment>
-								{props.data[index].projects?.map(proj => (
+								{props.tasks[index].projects?.map(proj => (
 									<Chip className={classes.chip} label={proj} key={proj} />
 								))}
 							</Fragment>
@@ -107,7 +107,7 @@ function TodoList(props: Props) {
 						filterType: "multiselect",
 						customBodyRenderLite: index => (
 							<Fragment>
-								{props.data[index].contexts?.map(ctx => (
+								{props.tasks[index].contexts?.map(ctx => (
 									<Chip className={classes.chip} label={ctx} key={ctx} />
 								))}
 							</Fragment>
@@ -115,15 +115,15 @@ function TodoList(props: Props) {
 					}
 				},
 				{
-					name: "date",
-					label: "Date",
+					name: "due",
+					label: "DUe",
 					options: {
 						filterType: "textField",
 						customBodyRender: (row: Date | null) => row && format(row, "yyyy-MM-dd")
 					}
 				}
 			]}
-			data={props.data}
+			data={props.tasks}
 			// actions={[
 			// 	{
 			// 		icon: () => <Add className={classes.add} />,
@@ -136,4 +136,4 @@ function TodoList(props: Props) {
 	);
 }
 
-export default TodoList;
+export default TaskList;

@@ -15,6 +15,8 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import FileSaver from "file-saver";
 import { RootState, rootActions } from "../store";
+import { initTaskJson } from "task.json";
+import { errorStyle } from "../utils/styles";
 
 interface Props {
 	open: boolean,
@@ -26,8 +28,9 @@ const useStyles = makeStyles(theme => ({
 		maxWidth: "45px"
 	},
 	dataButton: {
-		marginLeft: theme.spacing(1.5)
-	}
+		marginLeft: theme.spacing(1)
+	},
+	error: errorStyle(theme)
 }));
 
 function SettingsDialog(props: Props) {
@@ -56,8 +59,8 @@ function SettingsDialog(props: Props) {
 		
 		const reader = new FileReader();
 		reader.onload = () => {
-			const tasks = JSON.parse(reader.result as string);
-			dispatch(rootActions.setTasks(tasks));
+			const taskJson = JSON.parse(reader.result as string);
+			dispatch(rootActions.setTaskJson(taskJson));
 			dispatch(rootActions.addNotification({
 				severity: "success",
 				text: "Data imported successfully"
@@ -67,10 +70,14 @@ function SettingsDialog(props: Props) {
 	};
 
 	const exportData = () => {
-		const blob = new Blob([JSON.stringify(rootState.tasks, null, 2)], {
-			type: "text/plain;charset=utf-8"
-		});
-		FileSaver.saveAs(blob, "todo.json");
+		const blob = new Blob([
+			JSON.stringify(rootState.taskJson, null, 2)
+		], { type: "text/plain;charset=utf-8" });
+		FileSaver.saveAs(blob, "task.json");
+	};
+	
+	const clearData = () => {
+		dispatch(rootActions.setTaskJson(initTaskJson()));
 	};
 
 	return (
@@ -113,7 +120,7 @@ function SettingsDialog(props: Props) {
 					<ListItem>
 						<Grid container justify="space-between" alignItems="center">
 							<Grid item>
-								<ListItemText secondary="todo.json">
+								<ListItemText secondary="task.json">
 									JSON data
 								</ListItemText>
 							</Grid>
@@ -141,6 +148,14 @@ function SettingsDialog(props: Props) {
 									className={classes.dataButton}
 								>
 									Export
+								</Button>
+								<Button
+									variant="contained"
+									color="primary"
+									onClick={clearData}
+									className={`${classes.dataButton} ${classes.error}`}
+								>
+									Clear
 								</Button>
 							</Grid>
 						</Grid>

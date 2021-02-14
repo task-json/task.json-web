@@ -1,5 +1,5 @@
 {
-  "name": "todo.json-web",
+  "name": "task.json-web",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -27,8 +27,10 @@
     "react-redux": "^7.2.2",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
+    "task.json": "^1.3.0",
     "typeface-roboto": "^1.1.13",
     "typescript": "^4.1.2",
+    "uuid": "^8.3.2",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
@@ -61,6 +63,6 @@
     "@types/mui-datatables": "^3.7.0",
     "@types/react-redux": "^7.1.11",
     "@types/react-router-dom": "^5.1.6",
-    "todo.json": "^0.1.0"
+    "@types/uuid": "^8.3.0"
   }
 }

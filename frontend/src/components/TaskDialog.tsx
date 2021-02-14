@@ -18,13 +18,12 @@ import { Autocomplete } from "@material-ui/lab";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { rootActions, RootState } from "../store";
-import { Task } from "todo.json";
-import { initTask, getContexts, getProjects } from "../utils/task";
+import { Task } from "task.json";
+import { initTask, getFieldValues } from "../utils/task";
 
 interface Props {
 	open: boolean,
-	onClose: () => void,
-	tasks: Task[]
+	onClose: () => void
 }
 
 const useStyles = makeStyles(theme => ({
@@ -39,13 +38,13 @@ function TaskDialog(props: Props) {
 	const [task, setTask] = useState(initTask());
 	const dispatch = useDispatch();
 	const maxPriorities = useSelector((state: RootState) => state.settings.maxPriorities);
+  const taskJson = useSelector((state: RootState) => state.taskJson);
 	
 	// Error states
 	const [textError, setTextError] = useState(false);
 
-	const tasks = props.tasks;
-	const allProjects = getProjects(tasks);
-	const allContexts = getContexts(tasks);
+	const allProjects = getFieldValues(taskJson, "projects");
+	const allContexts = getFieldValues(taskJson, "contexts");
 
 	const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		.substr(0, maxPriorities)
@@ -75,6 +74,9 @@ function TaskDialog(props: Props) {
 			setTextError(error);
 			return;
 		}
+		const date = new Date().toISOString();
+		task.modified = date;
+		task.start = date;
 		dispatch(rootActions.addTask(task));
 		dispatch(rootActions.addNotification({
 			severity: "success",
