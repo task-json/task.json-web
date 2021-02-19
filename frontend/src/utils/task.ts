@@ -1,12 +1,4 @@
-import { TaskJson, Task, TaskType } from "task.json";
-import { v4 as uuidv4 } from "uuid";
-
-export const initTask = (): Task => ({
-  uuid: uuidv4(),
-	text: "",
-  start: new Date().toISOString(),
-  modified: new Date().toISOString()
-});
+import { TaskJson, TaskType } from "task.json";
 
 export function getFieldValues(taskJson: TaskJson, field: "projects" | "contexts") {
   const values: Set<string> = new Set();

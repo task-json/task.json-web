@@ -1,10 +1,10 @@
 import { Fragment } from "react";
 import { green } from "@material-ui/core/colors"
 import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
-import { format } from "date-fns";
 import MUIDataTable from "mui-datatables";
 import { Plus as PlusIcon } from "mdi-material-ui";
 import { Task } from "task.json";
+import { DateTime } from "luxon";
 
 interface Props {
 	onAdd: () => void,
@@ -116,22 +116,14 @@ function TaskList(props: Props) {
 				},
 				{
 					name: "due",
-					label: "DUe",
+					label: "Due",
 					options: {
 						filterType: "textField",
-						customBodyRender: (row: Date | null) => row && format(row, "yyyy-MM-dd")
+						customBodyRender: (row: string | null) => row && DateTime.fromISO(row).toFormat("yyyy-MM-dd")
 					}
 				}
 			]}
 			data={props.tasks}
-			// actions={[
-			// 	{
-			// 		icon: () => <Add className={classes.add} />,
-			// 		tooltip: "Add Task",
-			// 		isFreeAction: true,
-			// 		onClick: props.onAdd
-			// 	}
-			// ]}
 		/>
 	);
 }

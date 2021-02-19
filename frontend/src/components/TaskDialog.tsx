@@ -19,7 +19,8 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { rootActions, RootState } from "../store";
 import { Task } from "task.json";
-import { initTask, getFieldValues } from "../utils/task";
+import { getFieldValues } from "../utils/task";
+import { v4 as uuidv4 } from "uuid";
 
 interface Props {
 	open: boolean,
@@ -35,13 +36,24 @@ const useStyles = makeStyles(theme => ({
 
 function TaskDialog(props: Props) {
 	const classes = useStyles();
-	const [task, setTask] = useState(initTask());
 	const dispatch = useDispatch();
 	const maxPriorities = useSelector((state: RootState) => state.settings.maxPriorities);
-  const taskJson = useSelector((state: RootState) => state.taskJson);
+	const taskJson = useSelector((state: RootState) => state.taskJson);
+
+	const initTask = () => ({
+		text: "",
+		priority: undefined,
+		projects: [],
+		contexts: [],
+		due: null as null | string
+	});
+	
+	// Task Field
+	const [task, setTask] = useState(initTask());
 	
 	// Error states
 	const [textError, setTextError] = useState(false);
+	const [dueValid, setDueValid] = useState(false);
 
 	const allProjects = getFieldValues(taskJson, "projects");
 	const allContexts = getFieldValues(taskJson, "contexts");
@@ -52,15 +64,18 @@ function TaskDialog(props: Props) {
 
 	const reset = () => {
 		setTask(initTask());
-
 		setTextError(false);
 	};
 
 	const setTaskField = (field: keyof Task, value: any) => {
-		setTask({
-			...task,
-			[field]: value
-		});
+		if (field) {
+			// FIXME
+			console.log(field, value)
+			setTask({
+				...task,
+				[field]: value
+			});
+		}
 	};
 
 	const handleClose = () => {
@@ -69,15 +84,26 @@ function TaskDialog(props: Props) {
 	};
 
 	const submit = () => {
+		console.log(task);
 		const error = task.text.length === 0;
 		if (error) {
 			setTextError(error);
 			return;
 		}
+		if (!dueValid)
+			return;
+
 		const date = new Date().toISOString();
-		task.modified = date;
-		task.start = date;
-		dispatch(rootActions.addTask(task));
+		dispatch(rootActions.addTask({
+			uuid: uuidv4(),
+			text: task.text,
+			priority: task.priority,
+			projects: task.projects.length ? task.projects : undefined,
+			contexts: task.contexts.length ? task.contexts : undefined,
+			due: task.due ? new Date(task.due).toISOString() : undefined,
+			start: date,
+			modified: date
+		}));
 		dispatch(rootActions.addNotification({
 			severity: "success",
 			text: "Successfully add a new task"
@@ -105,7 +131,7 @@ function TaskDialog(props: Props) {
 						value={task.priority}
 						onChange={event => setTaskField("priority", event.target.value)}
 					>
-						<MenuItem value={""}>
+						<MenuItem value={undefined}>
 							None
 						</MenuItem>
 						{alphabet.map(char => (
@@ -117,10 +143,14 @@ function TaskDialog(props: Props) {
 				</FormControl>
 				<KeyboardDatePicker
 					className={classes.input}
-					label="Start Date"
+					label="Due Date"
 					format="yyyy-MM-dd"
-					value={task.start}
-					onChange={(_, value) => setTaskField("start", value)}
+					value={task.due || null}
+					clearable
+					onChange={(date, value) => {
+						setTaskField("due", value);
+						setDueValid(date === null || date.isValid);
+					}}
 				/>
 				<Autocomplete
 					multiple

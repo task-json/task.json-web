@@ -5,7 +5,7 @@ import TaskDialog from "./components/TaskDialog";
 import { useSelector } from 'react-redux';
 import { RootState } from "./store";
 import { TaskType } from "task.json";
-import { blue, lightBlue } from "@material-ui/core/colors";
+import { blue } from "@material-ui/core/colors";
 import {
   Container,
   makeStyles,
@@ -18,7 +18,8 @@ import {
 } from "@material-ui/lab";
 import {
   Schedule as ScheduleIcon,
-  Check as CheckIcon
+  Check as CheckIcon,
+  Delete as DeleteIcon
 } from "@material-ui/icons"
 
 const useStyles = makeStyles(theme => ({
@@ -37,12 +38,12 @@ const useStyles = makeStyles(theme => ({
     paddingLeft: theme.spacing(2.5),
     paddingRight: theme.spacing(2.5),
     "&.Mui-selected": {
-      color: blue[500],
-      backgroundColor: fade(blue[500], 0.1)
+      color: blue[700],
+      backgroundColor: fade(blue[700], 0.12)
     },
     "&.Mui-selected:hover": {
-      color: blue[500],
-      backgroundColor: fade(blue[500], 0.16)
+      color: blue[700],
+      backgroundColor: fade(blue[700], 0.18)
     }
   },
   icon: {
@@ -61,7 +62,6 @@ function App() {
       setTaskType(newType);
   };
 
-  // TODO: add buttons to select task type
   return (
     <Layout>
       <TaskDialog
@@ -87,6 +87,10 @@ function App() {
           <ToggleButton value="done" className={classes.toggleButton}>
             <CheckIcon className={classes.icon} />
             done
+          </ToggleButton>
+          <ToggleButton value="removed" className={classes.toggleButton}>
+            <DeleteIcon className={classes.icon} />
+            removed
           </ToggleButton>
         </ToggleButtonGroup>
 

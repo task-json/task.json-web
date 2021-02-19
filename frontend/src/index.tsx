@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateFnsUtils from '@date-io/date-fns';
+import LuxonUtils from '@date-io/luxon';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import store from "./store";
@@ -23,7 +23,7 @@ const theme = createMuiTheme({
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
+      <MuiPickersUtilsProvider utils={LuxonUtils}>
         <ThemeProvider theme={theme}>
           <App />
         </ThemeProvider>
