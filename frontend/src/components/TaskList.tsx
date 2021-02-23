@@ -1,14 +1,16 @@
 import { Fragment } from "react";
-import { green } from "@material-ui/core/colors"
+import { green, red } from "@material-ui/core/colors"
 import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
 import MUIDataTable from "mui-datatables";
-import { Plus as PlusIcon } from "mdi-material-ui";
-import { Task } from "task.json";
+import { Plus as PlusIcon, Delete as DeleteIcon } from "mdi-material-ui";
+import { TaskType } from "task.json";
 import { DateTime } from "luxon";
+import { useDispatch, useSelector } from "react-redux";
+import { rootActions, RootState } from "../store";
 
 interface Props {
 	onAdd: () => void,
-	tasks: Task[]
+	taskType: TaskType
 }
 
 const useStyles = makeStyles(theme => ({
@@ -16,6 +18,12 @@ const useStyles = makeStyles(theme => ({
 		"&:hover": {
 			color: green[500]
 		}
+	},
+	del: {
+		"&:hover": {
+			color: red[500]
+		},
+		marginRight: theme.spacing(2)
 	},
 	chip: {
 		marginRight: theme.spacing(1),
@@ -42,8 +50,39 @@ const CustomToolbar = (props: CustomToolbarProps) => {
 	);
 };
 
+
+interface CustomToolbarSelectProps {
+	selectedRows: number[],
+	onRemove: (indexes: number[]) => void;
+};
+
+const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
+	const classes = useStyles();
+
+	return (
+		<Tooltip title="Remove Tasks">
+			<IconButton
+				className={classes.del}
+				onClick={() => props.onRemove(props.selectedRows)}
+			>
+				<DeleteIcon />
+			</IconButton>
+		</Tooltip>
+	);
+};
+
 function TaskList(props: Props) {
 	const classes = useStyles();
+	const dispatch = useDispatch();
+	const tasks = useSelector((state: RootState) => state.taskJson[props.taskType]);
+
+	const removeTasks = (indexes: number[]) => {
+		dispatch(rootActions.removeTasks({
+			type: props.taskType as any,
+			indexes
+		}));
+	};
+
 
 	return (
 		<MUIDataTable
@@ -53,6 +92,12 @@ function TaskList(props: Props) {
 				download: false,
 				customToolbar: () => {
 					return <CustomToolbar onAdd={props.onAdd} />
+				},
+				customToolbarSelect: (selectedRows) => {
+					const indexes = selectedRows.data.map(({ dataIndex }) => dataIndex);
+					return <CustomToolbarSelect selectedRows={indexes} onRemove={removeTasks} />
+				},
+				onRowsDelete: (rows) => {
 				}
 			}}
 			columns={[
@@ -93,7 +138,7 @@ function TaskList(props: Props) {
 						filterType: "multiselect",
 						customBodyRenderLite: index => (
 							<Fragment>
-								{props.tasks[index].projects?.map(proj => (
+								{tasks[index].projects?.map(proj => (
 									<Chip className={classes.chip} label={proj} key={proj} />
 								))}
 							</Fragment>
@@ -107,7 +152,7 @@ function TaskList(props: Props) {
 						filterType: "multiselect",
 						customBodyRenderLite: index => (
 							<Fragment>
-								{props.tasks[index].contexts?.map(ctx => (
+								{tasks[index].contexts?.map(ctx => (
 									<Chip className={classes.chip} label={ctx} key={ctx} />
 								))}
 							</Fragment>
@@ -123,7 +168,7 @@ function TaskList(props: Props) {
 					}
 				}
 			]}
-			data={props.tasks}
+			data={tasks}
 		/>
 	);
 }

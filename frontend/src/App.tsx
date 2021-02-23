@@ -2,8 +2,6 @@ import { useState } from 'react';
 import TaskList from "./components/TaskList";
 import Layout from "./components/Layout";
 import TaskDialog from "./components/TaskDialog";
-import { useSelector } from 'react-redux';
-import { RootState } from "./store";
 import { TaskType } from "task.json";
 import { blue } from "@material-ui/core/colors";
 import {
@@ -52,7 +50,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function App() {
-  const taskJson = useSelector((state: RootState) => state.taskJson);
   const classes = useStyles();
   const [taskDialog, setTaskDialog] = useState(false);
   const [taskType, setTaskType] = useState<TaskType>("todo");
@@ -95,7 +92,7 @@ function App() {
         </ToggleButtonGroup>
 
         <TaskList
-          tasks={taskJson[taskType]}
+          taskType={taskType}
           onAdd={() => setTaskDialog(true)}
         />
       </Container>

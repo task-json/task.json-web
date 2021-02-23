@@ -38,13 +38,13 @@ const rootSlice = createSlice({
 		addTask(state, action: PayloadAction<Task>) {
 			state.taskJson.todo.push(action.payload);
 		},
-		removeTask(state, action: PayloadAction<{
+		removeTasks(state, action: PayloadAction<{
 			type: "todo" | "done",
-			uuid: string
+			indexes: number[]
 		}>) {
 			const date = new Date().toISOString();
-			const { uuid, type } = action.payload;
-			const removedTasks = _.remove(state.taskJson[type], task => task.uuid === uuid)
+			const { type, indexes } = action.payload;
+			const removedTasks = _.remove(state.taskJson[type], (_, index) => indexes.includes(index))
 				.map(task => {
 					task.modified = date;
 					return task;
