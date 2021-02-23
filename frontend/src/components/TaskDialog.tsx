@@ -15,16 +15,19 @@ import {
 	KeyboardDatePicker
 } from "@material-ui/pickers";
 import { Autocomplete } from "@material-ui/lab";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { rootActions, RootState } from "../store";
-import { Task } from "task.json";
+import { Task, TaskType } from "task.json";
 import { getFieldValues } from "../utils/task";
 import { v4 as uuidv4 } from "uuid";
 
 interface Props {
-	open: boolean,
-	onClose: () => void
+	open: boolean;
+	onClose: () => void;
+	// Edit a task
+	task: Task | null;
+	taskType: TaskType;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -34,26 +37,31 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
+
+const initTask = (task: Task | null) => ({
+	text: "",
+	priority: "",
+	projects: [],
+	contexts: [],
+	due: null as null | string,
+	...task
+});
+
 function TaskDialog(props: Props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const maxPriorities = useSelector((state: RootState) => state.settings.maxPriorities);
 	const taskJson = useSelector((state: RootState) => state.taskJson);
-
-	const initTask = () => ({
-		text: "",
-		priority: undefined,
-		projects: [],
-		contexts: [],
-		due: null as null | string
-	});
 	
 	// Task Field
-	const [task, setTask] = useState(initTask());
+	const [task, setTask] = useState(initTask(props.task));
+	useEffect(() => {
+		setTask(initTask(props.task));
+	}, [props.task]);
 	
 	// Error states
 	const [textError, setTextError] = useState(false);
-	const [dueValid, setDueValid] = useState(false);
+	const [dueValid, setDueValid] = useState(true);
 
 	const allProjects = getFieldValues(taskJson, "projects");
 	const allContexts = getFieldValues(taskJson, "contexts");
@@ -63,14 +71,12 @@ function TaskDialog(props: Props) {
 		.split("");
 
 	const reset = () => {
-		setTask(initTask());
+		setTask(initTask(props.task));
 		setTextError(false);
 	};
 
 	const setTaskField = (field: keyof Task, value: any) => {
 		if (field) {
-			// FIXME
-			console.log(field, value)
 			setTask({
 				...task,
 				[field]: value
@@ -84,7 +90,6 @@ function TaskDialog(props: Props) {
 	};
 
 	const submit = () => {
-		console.log(task);
 		const error = task.text.length === 0;
 		if (error) {
 			setTextError(error);
@@ -94,25 +99,36 @@ function TaskDialog(props: Props) {
 			return;
 
 		const date = new Date().toISOString();
-		dispatch(rootActions.addTask({
-			uuid: uuidv4(),
+		const newTask: Task = {
+			uuid: task.uuid ?? uuidv4(),
 			text: task.text,
-			priority: task.priority,
-			projects: task.projects.length ? task.projects : undefined,
-			contexts: task.contexts.length ? task.contexts : undefined,
-			due: task.due ? new Date(task.due).toISOString() : undefined,
-			start: date,
+			...(task.priority.length && { priority: task.priority }),
+			...(task.projects.length && { projects: task.projects }),
+			...(task.contexts.length && { contexts: task.contexts }),
+			...(task.due && { due: new Date(task.due).toISOString() }),
+			start: task.start ?? date,
 			modified: date
-		}));
+		};
+
+		if (!props.task) {
+			dispatch(rootActions.addTask(newTask));
+		}
+		else {
+			dispatch(rootActions.modifyTask({
+				type: props.taskType!,
+				task: newTask
+			}));
+		}
+
 		dispatch(rootActions.addNotification({
 			severity: "success",
-			text: "Successfully add a new task"
+			text: `Successfully ${props.task ? "edit" : "add"} a new task.`
 		}));
 	}
 
 	return (
 		<Dialog open={props.open} onClose={props.onClose} maxWidth="xs">
-			<DialogTitle>Add Task</DialogTitle>
+			<DialogTitle>{props.task ? "Edit" : "Add"} Task</DialogTitle>
 			<DialogContent>
 				<TextField
 					error={textError}
@@ -131,7 +147,7 @@ function TaskDialog(props: Props) {
 						value={task.priority}
 						onChange={event => setTaskField("priority", event.target.value)}
 					>
-						<MenuItem value={undefined}>
+						<MenuItem value={""}>
 							None
 						</MenuItem>
 						{alphabet.map(char => (

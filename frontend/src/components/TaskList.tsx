@@ -1,16 +1,21 @@
 import { Fragment } from "react";
-import { green, red } from "@material-ui/core/colors"
+import { green, red, blue } from "@material-ui/core/colors"
 import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
 import MUIDataTable from "mui-datatables";
-import { Plus as PlusIcon, Delete as DeleteIcon } from "mdi-material-ui";
-import { TaskType } from "task.json";
+import {
+	Plus as PlusIcon,
+	Delete as DeleteIcon,
+	Pencil as PencilIcon
+} from "mdi-material-ui";
+import { TaskType, Task } from "task.json";
 import { DateTime } from "luxon";
 import { useDispatch, useSelector } from "react-redux";
 import { rootActions, RootState } from "../store";
 
 interface Props {
-	onAdd: () => void,
-	taskType: TaskType
+	onAdd: () => void;
+	onEdit: (task: Task) => void;
+	taskType: TaskType;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -19,11 +24,21 @@ const useStyles = makeStyles(theme => ({
 			color: green[500]
 		}
 	},
+	edit: {
+		"&:hover": {
+			color: blue[500]
+		}
+	},
 	del: {
 		"&:hover": {
 			color: red[500]
-		},
+		}
+	},
+	toolbarSelect: {
 		marginRight: theme.spacing(2)
+	},
+	actionButton: {
+		marginLeft: theme.spacing(0.2)
 	},
 	chip: {
 		marginRight: theme.spacing(1),
@@ -62,7 +77,7 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 	return (
 		<Tooltip title="Remove Tasks">
 			<IconButton
-				className={classes.del}
+				className={`${classes.del} ${classes.toolbarSelect}`}
 				onClick={() => props.onRemove(props.selectedRows)}
 			>
 				<DeleteIcon />
@@ -96,8 +111,6 @@ function TaskList(props: Props) {
 				customToolbarSelect: (selectedRows) => {
 					const indexes = selectedRows.data.map(({ dataIndex }) => dataIndex);
 					return <CustomToolbarSelect selectedRows={indexes} onRemove={removeTasks} />
-				},
-				onRowsDelete: (rows) => {
 				}
 			}}
 			columns={[
@@ -165,6 +178,35 @@ function TaskList(props: Props) {
 					options: {
 						filterType: "textField",
 						customBodyRender: (row: string | null) => row && DateTime.fromISO(row).toFormat("yyyy-MM-dd")
+					}
+				},
+				{
+					name: "actions",
+					label: "Actions",
+					options: {
+						empty: true,
+						customBodyRenderLite: index => (
+							<Fragment>
+								<Tooltip title="Edit">
+									<IconButton
+										className={classes.edit}
+										size="small"
+										onClick={() => props.onEdit(tasks[index])}
+									>
+										<PencilIcon />
+									</IconButton>
+								</Tooltip>
+								<Tooltip title="Remove">
+									<IconButton
+										className={`${classes.del} ${classes.actionButton}`}
+										size="small"
+										onClick={() => removeTasks([index])}
+									>
+										<DeleteIcon />
+									</IconButton>
+								</Tooltip>
+							</Fragment>
+						)
 					}
 				}
 			]}

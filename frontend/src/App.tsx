@@ -2,7 +2,7 @@ import { useState } from 'react';
 import TaskList from "./components/TaskList";
 import Layout from "./components/Layout";
 import TaskDialog from "./components/TaskDialog";
-import { TaskType } from "task.json";
+import { Task, TaskType } from "task.json";
 import { blue } from "@material-ui/core/colors";
 import {
   Container,
@@ -53,17 +53,24 @@ function App() {
   const classes = useStyles();
   const [taskDialog, setTaskDialog] = useState(false);
   const [taskType, setTaskType] = useState<TaskType>("todo");
+  const [currentTask, setCurrentTask] = useState<Task | null>(null);
 
   const handleTaskType = (_event: React.MouseEvent<HTMLElement>, newType: TaskType | null) => {
     if (newType)
       setTaskType(newType);
+  };
+  const handleDialogClose = () => {
+    setTaskDialog(false);
+    setCurrentTask(null);
   };
 
   return (
     <Layout>
       <TaskDialog
         open={taskDialog}
-        onClose={() => setTaskDialog(false)}
+        onClose={handleDialogClose}
+        task={currentTask}
+        taskType={taskType}
       />
 
       <Container>
@@ -94,6 +101,10 @@ function App() {
         <TaskList
           taskType={taskType}
           onAdd={() => setTaskDialog(true)}
+          onEdit={task => {
+            setCurrentTask(task);
+            setTaskDialog(true);
+          }}
         />
       </Container>
     </Layout>
