@@ -51,6 +51,37 @@ const rootSlice = createSlice({
 				});
 			state.taskJson.removed.push(...removedTasks);
 		},
+		doTasks(state, action: PayloadAction<number[]>) {
+			const date = new Date().toISOString();
+			const indexes = action.payload;
+			const doneTasks = _.remove(state.taskJson.todo, (_, index) => indexes.includes(index))
+				.map(task => {
+					task.end = date;
+					task.modified = date;
+					return task;
+				});
+			state.taskJson.done.push(...doneTasks);
+		},
+		undoTasks(state, action: PayloadAction<{
+			type: "removed" | "done",
+			indexes: number[]
+		}>) {
+			const date = new Date().toISOString();
+			const { type, indexes } = action.payload;
+			const undoneTasks = _.remove(state.taskJson[type], (_, index) => indexes.includes(index))
+				.map(task => {
+					task.modified = date;
+					return task;
+				});
+			const doneTasks = undoneTasks.filter(task => type === "removed" && task.end);
+			const todoTasks = undoneTasks.filter(task => type === "done" || !task.end);
+			todoTasks.forEach(task => {
+				delete task.end;
+				return task;
+			});
+			state.taskJson.todo.push(...todoTasks);
+			state.taskJson.done.push(...doneTasks);
+		},
 		modifyTask(state, action: PayloadAction<{
 			type: TaskType;
 			task: Task;

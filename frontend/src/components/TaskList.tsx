@@ -1,11 +1,12 @@
-import { Fragment } from "react";
 import { green, red, blue } from "@material-ui/core/colors"
 import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
 import MUIDataTable from "mui-datatables";
 import {
 	Plus as PlusIcon,
 	Delete as DeleteIcon,
-	Pencil as PencilIcon
+	Pencil as PencilIcon,
+	Restore as RestoreIcon,
+	Check as CheckIcon
 } from "mdi-material-ui";
 import { TaskType, Task } from "task.json";
 import { DateTime } from "luxon";
@@ -67,22 +68,110 @@ const CustomToolbar = (props: CustomToolbarProps) => {
 
 
 interface CustomToolbarSelectProps {
-	selectedRows: number[],
+	selectedRows: number[];
+	taskType: TaskType;
 	onRemove: (indexes: number[]) => void;
+	onUndo: (indexes: number[]) => void;
+	onDo: (indexes: number[]) => void;
 };
 
 const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 	const classes = useStyles();
 
 	return (
-		<Tooltip title="Remove Tasks">
-			<IconButton
-				className={`${classes.del} ${classes.toolbarSelect}`}
-				onClick={() => props.onRemove(props.selectedRows)}
-			>
-				<DeleteIcon />
-			</IconButton>
-		</Tooltip>
+		<div className={classes.toolbarSelect}>
+			{props.taskType !== "todo" &&
+				<Tooltip title="Undo Tasks">
+					<IconButton
+						className={classes.add}
+						onClick={() => props.onUndo(props.selectedRows)}
+					>
+						<RestoreIcon />
+					</IconButton>
+				</Tooltip>
+			}
+			{props.taskType === "todo" &&
+				<Tooltip title="Do Tasks">
+					<IconButton
+						className={classes.add}
+						onClick={() => props.onDo(props.selectedRows)}
+					>
+						<CheckIcon />
+					</IconButton>
+				</Tooltip>
+			}
+			{props.taskType !== "removed" &&
+				<Tooltip title="Remove Tasks">
+					<IconButton
+						className={classes.del}
+						onClick={() => props.onRemove(props.selectedRows)}
+					>
+						<DeleteIcon />
+					</IconButton>
+				</Tooltip>
+			}
+		</div>
+	);
+};
+
+interface ActionsProps {
+	taskType: TaskType;
+	task: Task;
+	index: number;
+	onRemove: (indexes: number[]) => void;
+	onUndo: (indexes: number[]) => void;
+	onEdit: (task: Task) => void;
+	onDo: (indexes: number[]) => void;
+};
+
+const Actions = (props: ActionsProps) => {
+	const classes = useStyles();
+
+	return (
+		<>
+			{props.taskType === "todo" &&
+				<Tooltip title="Do">
+					<IconButton
+						className={`${classes.add} ${classes.actionButton}`}
+						size="small"
+						onClick={() => props.onDo([props.index])}
+					>
+						<CheckIcon />
+					</IconButton>
+				</Tooltip>
+			}
+			{props.taskType !== "todo" &&
+				<Tooltip title="Undo">
+					<IconButton
+						className={`${classes.add} ${classes.actionButton}`}
+						size="small"
+						onClick={() => props.onUndo([props.index])}
+					>
+						<RestoreIcon />
+					</IconButton>
+				</Tooltip>
+			}
+			<Tooltip title="Edit">
+				<IconButton
+					className={classes.edit}
+					size="small"
+					onClick={() => props.onEdit(props.task)}
+				>
+					<PencilIcon />
+				</IconButton>
+			</Tooltip>
+			{props.taskType !== "removed" &&
+				<Tooltip title="Remove">
+					<IconButton
+						className={`${classes.del} ${classes.actionButton}`}
+						size="small"
+						onClick={() => props.onRemove([props.index])}
+					>
+						<DeleteIcon />
+					</IconButton>
+				</Tooltip>
+			}
+		</>
 	);
 };
 
@@ -92,12 +181,26 @@ function TaskList(props: Props) {
 	const tasks = useSelector((state: RootState) => state.taskJson[props.taskType]);
 
 	const removeTasks = (indexes: number[]) => {
-		dispatch(rootActions.removeTasks({
-			type: props.taskType as any,
-			indexes
-		}));
+		if (props.taskType !== "removed") {
+			dispatch(rootActions.removeTasks({
+				type: props.taskType,
+				indexes
+			}));
+		}
 	};
 
+	const undoTasks = (indexes: number[]) => {
+		if (props.taskType !== "todo") {
+			dispatch(rootActions.undoTasks({
+				type: props.taskType,
+				indexes
+			}));
+		}
+	};
+
+	const doTasks = (indexes: number[]) => {
+		dispatch(rootActions.doTasks(indexes));
+	};
 
 	return (
 		<MUIDataTable
@@ -110,7 +213,15 @@ function TaskList(props: Props) {
 				},
 				customToolbarSelect: (selectedRows) => {
 					const indexes = selectedRows.data.map(({ dataIndex }) => dataIndex);
-					return <CustomToolbarSelect selectedRows={indexes} onRemove={removeTasks} />
+					return (
+						<CustomToolbarSelect
+							taskType={props.taskType}
+							selectedRows={indexes}
+							onRemove={removeTasks}
+							onUndo={undoTasks}
+							onDo={doTasks}
+						/>
+					);
 				}
 			}}
 			columns={[
@@ -150,11 +261,11 @@ function TaskList(props: Props) {
 					options: {
 						filterType: "multiselect",
 						customBodyRenderLite: index => (
-							<Fragment>
+							<>
 								{tasks[index].projects?.map(proj => (
 									<Chip className={classes.chip} label={proj} key={proj} />
 								))}
-							</Fragment>
+							</>
 						)
 					}
 				},
@@ -164,11 +275,11 @@ function TaskList(props: Props) {
 					options: {
 						filterType: "multiselect",
 						customBodyRenderLite: index => (
-							<Fragment>
+							<>
 								{tasks[index].contexts?.map(ctx => (
 									<Chip className={classes.chip} label={ctx} key={ctx} />
 								))}
-							</Fragment>
+							</>
 						)
 					}
 				},
@@ -186,26 +297,15 @@ function TaskList(props: Props) {
 					options: {
 						empty: true,
 						customBodyRenderLite: index => (
-							<Fragment>
-								<Tooltip title="Edit">
-									<IconButton
-										className={classes.edit}
-										size="small"
-										onClick={() => props.onEdit(tasks[index])}
-									>
-										<PencilIcon />
-									</IconButton>
-								</Tooltip>
-								<Tooltip title="Remove">
-									<IconButton
-										className={`${classes.del} ${classes.actionButton}`}
-										size="small"
-										onClick={() => removeTasks([index])}
-									>
-										<DeleteIcon />
-									</IconButton>
-								</Tooltip>
-							</Fragment>
+							<Actions
+								taskType={props.taskType}
+								task={tasks[index]}
+								index={index}
+								onEdit={props.onEdit}
+								onRemove={removeTasks}
+								onUndo={undoTasks}
+								onDo={doTasks}
+							/>
 						)
 					}
 				}
