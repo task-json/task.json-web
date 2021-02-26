@@ -95,9 +95,6 @@ const rootSlice = createSlice({
 		},
 		updateSettings(state, action: PayloadAction<Settings>) {
 			state.settings = action.payload;
-		},
-		updateMaxPriorities(state, action: PayloadAction<number>) {
-			state.settings.maxPriorities = action.payload;
 		}
 	},
 	extraReducers(builder) {
