@@ -1,5 +1,6 @@
 import {
 	Button,
+	IconButton,
 	Dialog,
 	DialogActions,
 	DialogContent,
@@ -19,6 +20,14 @@ import FileSaver from "file-saver";
 import { RootState, rootActions, asyncActions } from "../store";
 import { initTaskJson } from "task.json";
 import { redBgStyle, redStyle } from "../utils/styles";
+import {
+	CloudUpload as CloudUploadIcon,
+	CloudDownload as CloudDownloadIcon,
+	Sync as SyncIcon,
+	Import as ImportIcon,
+	Export as ExportIcon,
+	Delete as DeleteIcon
+} from "mdi-material-ui";
 
 interface Props {
 	open: boolean,
@@ -128,7 +137,12 @@ function SettingsDialog(props: Props) {
 	}
 
 	return (
-		<Dialog open={props.open} onClose={props.onClose} fullWidth>
+		<Dialog
+			open={props.open}
+			onClose={props.onClose}
+			disableBackdropClick
+			fullWidth
+		>
 			<DialogTitle className={classes.title}>Settings</DialogTitle>
 			<DialogContent>
 				<List>
@@ -180,15 +194,14 @@ function SettingsDialog(props: Props) {
 								</ListItemText>
 							</Grid>
 							<Grid item>
-								<Button
-									variant="contained"
+								<IconButton
 									color="secondary"
 									onClick={exportData}
 									className={classes.dataButton}
-									size="small"
+									title="Export"
 								>
-									Export
-								</Button>
+									<ExportIcon />
+								</IconButton>
 								<input
 									id="import-data-input"
 									style={{ display: "none" }}
@@ -196,25 +209,22 @@ function SettingsDialog(props: Props) {
 									onChange={event => importData(event.target.files)}
 								/>
 								<label htmlFor="import-data-input">
-									<Button
-										variant="contained"
+									<IconButton
 										color="primary"
 										className={classes.dataButton}
 										component="span"
-										size="small"
+										title="Import"
 									>
-										Import
-									</Button>
+										<ImportIcon />
+									</IconButton>
 								</label>
-								<Button
-									size="small"
-									variant="contained"
-									color="primary"
+								<IconButton
 									onClick={clearData}
-									className={`${classes.dataButton} ${classes.redBg}`}
+									className={`${classes.dataButton} ${classes.red}`}
+									title="Clear"
 								>
-									Clear
-								</Button>
+									<DeleteIcon />
+								</IconButton>
 							</Grid>
 						</Grid>
 					</ListItem>
@@ -294,36 +304,33 @@ function SettingsDialog(props: Props) {
 								</ListItemText>
 							</Grid>
 							<Grid item>
-								<Button
-									size="small"
-									variant="contained"
+								<IconButton
 									color="secondary"
 									className={classes.dataButton}
 									onClick={sync}
 									disabled={!settings.token}
+									title="Sync"
 								>
-									Sync
-								</Button>
-								<Button
-									size="small"
-									variant="contained"
+									<SyncIcon />
+								</IconButton>
+								<IconButton
 									color="primary"
 									className={classes.dataButton}
 									onClick={upload}
 									disabled={!settings.token}
+									title="Upload"
 								>
-									Upload
-								</Button>
-								<Button
-									size="small"
-									variant="contained"
+									<CloudUploadIcon />
+								</IconButton>
+								<IconButton
 									color="primary"
-									className={`${classes.dataButton} ${classes.redBg}`}
+									className={`${classes.dataButton} ${classes.red}`}
 									onClick={download}
 									disabled={!settings.token}
+									title="Download"
 								>
-									Download
-								</Button>
+									<CloudDownloadIcon />
+								</IconButton>
 							</Grid>
 						</Grid>
 					</ListItem>
