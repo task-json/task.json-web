@@ -105,8 +105,20 @@ const rootSlice = createSlice({
 		setTaskJson(state, action: PayloadAction<TaskJson>) {
 			state.taskJson = action.payload;
 		},
-		updateSettings(state, action: PayloadAction<Settings>) {
-			state.settings = action.payload;
+		updateSettings(state, action: PayloadAction<{
+			maxPriorities?: number | null;
+			server?: string | null;
+			token?: string | null;
+		}>) {
+			for (const [key, value] of Object.entries(action.payload)) {
+				const typedKey = key as keyof Settings;
+				if (value === null) {
+					delete state.settings[typedKey];
+				}
+				else {
+					state.settings[typedKey] = value as never;
+				}
+			}
 		}
 	},
 	extraReducers(builder) {

@@ -62,19 +62,20 @@ function SettingsDialog(props: Props) {
 	const [errorPriorities, setErrorPriorities] = useState(false);
 	const [server, setServer] = useState(settings.server ?? "");
 	const [password, setPassword] = useState("");
-	const [token, setToken] = useState(settings.token ?? "");
+	const [oldToken, setOldToken] = useState(settings.token ?? "");
 
 	const reset = () => {
 		setMaxPriorities(rootState.settings.maxPriorities.toString());
+		dispatch(rootActions.updateSettings({ token: oldToken }));
 	};
 
 	const save = () => {
 		if (!errorPriorities) {
 			dispatch(rootActions.updateSettings({
 				maxPriorities: parseInt(maxPriorities),
-				...(server.length && { server }),
-				...(token.length && { token })
-			}))
+				server: server.length ? server : null
+			}));
+			setOldToken(settings.token ?? "");
 			props.onClose();
 		}
 	};
@@ -112,7 +113,9 @@ function SettingsDialog(props: Props) {
 		}));
 	}
 	const logout = () => {
-		setToken("");
+		dispatch(rootActions.updateSettings({
+			token: null
+		}));
 	};
 	const sync = () => {
 		dispatch(asyncActions.syncTasks());
@@ -242,7 +245,7 @@ function SettingsDialog(props: Props) {
 					<ListItem>
 						<Grid container justify="space-between" alignItems="center">
 							<Grid item>
-								<ListItemText secondary={token.length ? "already logged in" : "not logged in"}>
+								<ListItemText secondary={settings.token ? "already logged in" : "not logged in"}>
 									Session
 								</ListItemText>
 							</Grid>
@@ -250,7 +253,7 @@ function SettingsDialog(props: Props) {
 								display: "flex",
 								alignItems: "center"
 							}}>
-								{!token.length && (
+								{!settings.token && (
 									<>
 										<TextField
 											type="password"
@@ -270,7 +273,7 @@ function SettingsDialog(props: Props) {
 										</Button>
 									</>
 								)}
-								{token.length > 0 &&
+								{Boolean(settings.token) &&
 									<Button
 										size="small"
 										className={classes.red}
@@ -297,7 +300,7 @@ function SettingsDialog(props: Props) {
 									color="secondary"
 									className={classes.dataButton}
 									onClick={sync}
-									disabled={token.length === 0}
+									disabled={!settings.token}
 								>
 									Sync
 								</Button>
@@ -307,7 +310,7 @@ function SettingsDialog(props: Props) {
 									color="primary"
 									className={classes.dataButton}
 									onClick={upload}
-									disabled={token.length === 0}
+									disabled={!settings.token}
 								>
 									Upload
 								</Button>
@@ -317,7 +320,7 @@ function SettingsDialog(props: Props) {
 									color="primary"
 									className={`${classes.dataButton} ${classes.redBg}`}
 									onClick={download}
-									disabled={token.length === 0}
+									disabled={!settings.token}
 								>
 									Download
 								</Button>
