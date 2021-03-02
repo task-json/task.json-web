@@ -16,11 +16,9 @@ import {
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import FileSaver from "file-saver";
-import { RootState, rootActions } from "../store";
+import { RootState, rootActions, asyncActions } from "../store";
 import { initTaskJson } from "task.json";
 import { redBgStyle, redStyle } from "../utils/styles";
-import { errorGuard } from "../utils/error";
-import { Client } from "task.json-client";
 
 interface Props {
 	open: boolean,
@@ -107,33 +105,24 @@ function SettingsDialog(props: Props) {
 	const clearData = () => {
 		dispatch(rootActions.setTaskJson(initTaskJson()));
 	};
-
-	const login = errorGuard(async () => {
-		const client = new Client(server);
-		await client.login(password);
-		setToken(client.token!);
-	}, dispatch);
-
+	const login = () => {
+		dispatch(asyncActions.login({
+			server,
+			password
+		}));
+	}
 	const logout = () => {
 		setToken("");
 	};
-
-	const sync = errorGuard(async () => {
-		const client = new Client(server, token);
-		const taskJson = await client.sync(rootState.taskJson);
-		dispatch(rootActions.setTaskJson(taskJson));
-	}, dispatch);
-
-	const upload = errorGuard(async () => {
-		const client = new Client(server, token);
-		await client.upload(rootState.taskJson);
-	}, dispatch);
-
-	const download = errorGuard(async () => {
-		const client = new Client(server, token);
-		const taskJson = await client.download();
-		dispatch(rootActions.setTaskJson(taskJson));
-	}, dispatch);
+	const sync = () => {
+		dispatch(asyncActions.syncTasks());
+	}
+	const upload = () => {
+		dispatch(asyncActions.uploadTasks());
+	}
+	const download = () => {
+		dispatch(asyncActions.downloadTasks());
+	}
 
 	return (
 		<Dialog open={props.open} onClose={props.onClose} fullWidth>
@@ -257,8 +246,9 @@ function SettingsDialog(props: Props) {
 									Session
 								</ListItemText>
 							</Grid>
-							<Grid item alignItems="center" style={{
-								display: "flex"
+							<Grid item style={{
+								display: "flex",
+								alignItems: "center"
 							}}>
 								{!token.length && (
 									<>
@@ -272,7 +262,7 @@ function SettingsDialog(props: Props) {
 										/>
 										<Button
 											size="small"
-											disabled={server.length === 0}
+											disabled={server.length === 0 || password.length === 0}
 											onClick={login}
 											color="secondary"
 										>

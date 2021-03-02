@@ -1,16 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Notification, Settings } from "../types";
 import { initTaskJson, Task, TaskJson, TaskType } from "task.json";
-import axios from "axios";
+import { login, syncTasks, uploadTasks, downloadTasks } from "./async-actions";
 import _ from "lodash";
-
-// FIXME: use task.json-client
-const getTasks = createAsyncThunk("getTasks", async () => {
-	const resp = await axios.get("/tasks");
-	const tasks: TaskJson = JSON.parse(resp.data);
-	return tasks;
-});
+import { HttpError } from 'task.json-client';
 
 const initialState = {
 	taskJson: initTaskJson(),
@@ -21,15 +15,33 @@ const initialState = {
 	} as Settings
 };
 
+const createNotification = (payload: Notification) => ({
+	...payload,
+	id: new Date().toISOString()
+});
+
+const handleError = (state: RootState, action: any) => {
+	state.loading = false;
+	const error = action.error;
+	let message: string;
+	if (error instanceof HttpError) {
+		message = `Error ${error.status}: ${error.message}`;
+	}
+	else {
+		message = (error as Error).message;
+	}
+	state.notifications.push(createNotification({
+		severity: "error",
+		text: message
+	}));
+};
+
 const rootSlice = createSlice({
 	name: "app",
 	initialState,
 	reducers: {
 		addNotification(state, action: PayloadAction<Notification>) {
-			state.notifications.push({
-				...action.payload,
-				id: new Date().toISOString()
-			});
+			state.notifications.push(createNotification(action.payload));
 		},
 		// remove the first notification
 		removeNotification(state, action: PayloadAction<string>) {
@@ -98,21 +110,34 @@ const rootSlice = createSlice({
 		}
 	},
 	extraReducers(builder) {
-		builder.addCase(getTasks.pending, state => {
-			state.loading = true;
-		});
-		builder.addCase(getTasks.rejected, (state, action) => {
+		// login
+		builder.addCase(login.pending, state => { state.loading = true; });
+		builder.addCase(login.fulfilled, (state, action) => {
 			state.loading = false;
-			state.notifications.push({
-				id: new Date().toISOString(),
-				severity: "error",
-				text: action.error.message!
-			});
+			state.settings.token = action.payload;
 		});
-		builder.addCase(getTasks.fulfilled, (state, action) => {
+		builder.addCase(login.rejected, handleError);
+
+		// syncTasks
+		builder.addCase(syncTasks.pending, state => { state.loading = true; });
+		builder.addCase(syncTasks.fulfilled, (state, action) => {
 			state.loading = false;
 			state.taskJson = action.payload;
 		});
+		builder.addCase(syncTasks.rejected, handleError);
+
+		// downloadTasks
+		builder.addCase(downloadTasks.pending, state => { state.loading = true; });
+		builder.addCase(downloadTasks.fulfilled, (state, action) => {
+			state.loading = false;
+			state.taskJson = action.payload;
+		});
+		builder.addCase(downloadTasks.rejected, handleError);
+
+		// uploadTasks
+		builder.addCase(uploadTasks.pending, state => { state.loading = true; });
+		builder.addCase(uploadTasks.fulfilled, state => { state.loading = false; });
+		builder.addCase(uploadTasks.rejected, handleError);
 	}
 });
 
@@ -155,4 +180,10 @@ store.subscribe(_.throttle(() => {
 export default store;
 
 export const rootActions = rootSlice.actions;
+export const asyncActions = {
+	login,
+	syncTasks,
+	uploadTasks,
+	downloadTasks
+};
 export type RootState = ReturnType<typeof store.getState>;
