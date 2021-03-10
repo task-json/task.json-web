@@ -3,12 +3,16 @@ import TaskList from "./components/TaskList";
 import Layout from "./components/Layout";
 import TaskDialog from "./components/TaskDialog";
 import { Task, TaskType } from "task.json";
-import { blue } from "@material-ui/core/colors";
+import { useSelector } from "react-redux";
+import { RootState } from "./store";
 import {
   Container,
   makeStyles,
   Typography,
   fade,
+  CssBaseline,
+  createMuiTheme,
+  ThemeProvider
 } from '@material-ui/core';
 import {
   ToggleButton,
@@ -19,6 +23,21 @@ import {
   Check as CheckIcon,
   Delete as DeleteIcon
 } from "@material-ui/icons"
+import { green, blue } from '@material-ui/core/colors';
+
+const createTheme = (dark: boolean) => createMuiTheme({
+  palette: {
+    primary: {
+      main: blue[500],
+      contrastText: "#fff"
+    },
+    secondary: {
+      main: green[500],
+      contrastText: "#fff"
+    },
+    type: dark ? "dark" : "light"
+  }
+});
 
 const useStyles = makeStyles(theme => ({
   head: {
@@ -36,12 +55,12 @@ const useStyles = makeStyles(theme => ({
     paddingLeft: theme.spacing(2.5),
     paddingRight: theme.spacing(2.5),
     "&.Mui-selected": {
-      color: blue[700],
-      backgroundColor: fade(blue[700], 0.12)
+      color: blue[500],
+      backgroundColor: fade(blue[500], 0.12)
     },
     "&.Mui-selected:hover": {
-      color: blue[700],
-      backgroundColor: fade(blue[700], 0.18)
+      color: blue[500],
+      backgroundColor: fade(blue[500], 0.18)
     }
   },
   icon: {
@@ -50,6 +69,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function App() {
+  const dark = useSelector((state: RootState) => state.settings.dark);
+  const theme = createTheme(dark);
   const classes = useStyles();
   const [taskDialog, setTaskDialog] = useState(false);
   const [taskType, setTaskType] = useState<TaskType>("todo");
@@ -65,49 +86,52 @@ function App() {
   };
 
   return (
-    <Layout>
-      <TaskDialog
-        open={taskDialog}
-        onClose={handleDialogClose}
-        task={currentTask}
-        taskType={taskType}
-      />
-
-      <Container>
-        <Typography className={classes.head} variant="h5">
-          Tasks
-        </Typography>
-
-        <ToggleButtonGroup
-          value={taskType}
-          onChange={handleTaskType}
-          exclusive
-          className={classes.toggleGroup}
-        >
-          <ToggleButton value="todo" className={classes.toggleButton}>
-            <ScheduleIcon className={classes.icon} />
-            todo
-          </ToggleButton>
-          <ToggleButton value="done" className={classes.toggleButton}>
-            <CheckIcon className={classes.icon} />
-            done
-          </ToggleButton>
-          <ToggleButton value="removed" className={classes.toggleButton}>
-            <DeleteIcon className={classes.icon} />
-            removed
-          </ToggleButton>
-        </ToggleButtonGroup>
-
-        <TaskList
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Layout>
+        <TaskDialog
+          open={taskDialog}
+          onClose={handleDialogClose}
+          task={currentTask}
           taskType={taskType}
-          onAdd={() => setTaskDialog(true)}
-          onEdit={task => {
-            setCurrentTask(task);
-            setTaskDialog(true);
-          }}
         />
-      </Container>
-    </Layout>
+
+        <Container>
+          <Typography className={classes.head} variant="h5">
+            Tasks
+          </Typography>
+
+          <ToggleButtonGroup
+            value={taskType}
+            onChange={handleTaskType}
+            exclusive
+            className={classes.toggleGroup}
+          >
+            <ToggleButton value="todo" className={classes.toggleButton}>
+              <ScheduleIcon className={classes.icon} />
+              todo
+            </ToggleButton>
+            <ToggleButton value="done" className={classes.toggleButton}>
+              <CheckIcon className={classes.icon} />
+              done
+            </ToggleButton>
+            <ToggleButton value="removed" className={classes.toggleButton}>
+              <DeleteIcon className={classes.icon} />
+              removed
+            </ToggleButton>
+          </ToggleButtonGroup>
+
+          <TaskList
+            taskType={taskType}
+            onAdd={() => setTaskDialog(true)}
+            onEdit={task => {
+              setCurrentTask(task);
+              setTaskDialog(true);
+            }}
+          />
+        </Container>
+      </Layout>
+    </ThemeProvider>
   );
 }
 

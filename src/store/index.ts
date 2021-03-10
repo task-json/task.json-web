@@ -11,7 +11,8 @@ const initialState = {
 	notifications: [] as Notification[],
 	loading: false,
 	settings: {
-		maxPriorities: 3
+		maxPriorities: 3,
+		dark: false
 	} as Settings
 };
 
@@ -109,6 +110,7 @@ const rootSlice = createSlice({
 			maxPriorities?: number | null;
 			server?: string | null;
 			token?: string | null;
+			dark?: boolean;
 		}>) {
 			for (const [key, value] of Object.entries(action.payload)) {
 				const typedKey = key as keyof Settings;
@@ -185,7 +187,7 @@ store.subscribe(_.throttle(() => {
 	const state = store.getState();
 	saveState({
 		settings: state.settings,
-		taskJson: state.taskJson,
+		taskJson: state.taskJson
 	});
 }, 1000));
 

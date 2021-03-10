@@ -8,15 +8,18 @@ import {
 	Typography
 } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, rootActions } from "../store";
 import { Notification } from "../types";
 import {
-	Cog,
-	StickerCheckOutline
+	Cog as CogIcon,
+	StickerAlertOutline as StickerCheckOutlineIcon,
+	Brightness4 as Brightness4Icon,
+	Brightness7 as Brightness7Icon
 } from "mdi-material-ui";
 import SettingsDialog from "./SettingsDialog";
+import { blue } from '@material-ui/core/colors';
 
 type Props = {
 	children?: any
@@ -28,12 +31,17 @@ const useStyles = makeStyles(theme => ({
 	},
 	title: {
 		flexGrow: 1
+	},
+	appBar: {
+		backgroundColor: blue[700]
 	}
 }));
 
 function Layout(props: Props) {
 	const classes = useStyles();
-	const notifications = useSelector((state: RootState) => state.notifications)
+	const rootState = useSelector((state: RootState) => state);
+	const notifications = rootState.notifications;
+	const dark = rootState.settings.dark;
 	const dispatch = useDispatch();
   const [settingsDialog, setSettingsDialog] = useState(false);
 
@@ -52,21 +60,36 @@ function Layout(props: Props) {
 		}, duration.leavingScreen);
 	};
 
+	const handleDarkTheme = () => {
+		dispatch(rootActions.updateSettings({
+			dark: !dark
+		}));
+	};
+
 	return (
-		<Fragment>
-			<AppBar position="sticky">
+		<>
+			<AppBar className={classes.appBar} position="sticky">
 				<Toolbar>
-					<StickerCheckOutline className={classes.icon} />
+					<StickerCheckOutlineIcon className={classes.icon} />
 					<Typography variant="h6" noWrap className={classes.title}>
 						Task.json WebUI
 					</Typography>
 
 					<IconButton
 						color="inherit"
+						title={`Switch to ${dark ? "light" : "dark"} mode`}
+						onClick={handleDarkTheme}
+					>
+						{dark && <Brightness4Icon />}
+						{!dark && <Brightness7Icon />}
+					</IconButton>
+
+					<IconButton
+						color="inherit"
 						title="Settings"
 						onClick={() => setSettingsDialog(true)}
 					>
-						<Cog />
+						<CogIcon />
 					</IconButton>
 				</Toolbar>
 			</AppBar>
@@ -95,7 +118,7 @@ function Layout(props: Props) {
 			))}
 
 			{props.children}
-		</Fragment>
+		</>
 	);
 }
 

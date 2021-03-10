@@ -8,6 +8,7 @@ export type Notification = {
 
 export type Settings = {
 	maxPriorities: number;
+	dark: boolean;
 	server?: string;
 	token?: string;
 };

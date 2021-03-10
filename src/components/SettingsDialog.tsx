@@ -54,7 +54,7 @@ const useStyles = makeStyles(theme => ({
 	divider: {
 		marginLeft: theme.spacing(2),
 		marginRight: theme.spacing(2),
-		marginTop: theme.spacing(1)
+		marginTop: theme.spacing(2)
 	},
 	red: redStyle(theme),
 	redBg: redBgStyle(theme)

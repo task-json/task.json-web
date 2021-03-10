@@ -8,25 +8,12 @@ import reportWebVitals from './reportWebVitals';
 import store from "./store";
 import "typeface-roboto";
 import "./styles/app.css";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core";
-import { green } from '@material-ui/core/colors';
-
-const theme = createMuiTheme({
-	palette: {
-    secondary: {
-      main: green[500],
-      contrastText: "#fff"
-    }
-	}
-});
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
       <MuiPickersUtilsProvider utils={LuxonUtils}>
-        <ThemeProvider theme={theme}>
-          <App />
-        </ThemeProvider>
+        <App />
       </MuiPickersUtilsProvider>
     </Provider>
   </React.StrictMode>,
