@@ -34,6 +34,7 @@ jobs:
 
       - name: Build task.json-web
         run: |
+          rm package-lock.json
           npm ci
           npm run build
 
