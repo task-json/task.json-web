@@ -1,0 +1,52 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - master
+      - v*
+  pull_request:
+    branches:
+      - master
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 15.x]
+
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@latest
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@latest
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: Info
+        id: info
+        run: |
+          echo "RELEASE_NAME=task.json-web-$(basename $GITHUB_REF)" >> $GITHUB_ENV"
+
+      - name: Build task.json-web
+        run: |
+          npm ci
+          npm run build
+
+      - name: Create archive 
+        run: |
+          cd dist
+          zip -r ../$RELEASE_NAME.zip 
+
+      - name: Upload to GitHub release
+        uses: svenstaro/upload-release-action@v2
+        if: github.event_name == 'release'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./${{ steps.info.outputs.RELEASE_NAME }}.zip
+          tag: ${{ github.ref }}
+
