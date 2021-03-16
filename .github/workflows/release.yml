@@ -35,7 +35,7 @@ jobs:
       - name: Build task.json-web
         run: |
           rm package-lock.json
-          npm ci
+          npm install
           npm run build
 
       - name: Create archive 
