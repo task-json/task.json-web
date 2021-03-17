@@ -50,3 +50,9 @@ jobs:
           file: ./${{ steps.info.outputs.RELEASE_NAME }}.zip
           tag: ${{ github.ref }}
 
+      - name: Create demo GitHub page
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+
