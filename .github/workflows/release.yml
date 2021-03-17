@@ -39,7 +39,7 @@ jobs:
 
       - name: Create archive 
         run: |
-          cd dist
+          cd build
           zip -r ../$RELEASE_NAME.zip 
 
       - name: Upload to GitHub release
