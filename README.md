@@ -17,7 +17,7 @@ TODO
 
 ## Online Demo
 
-<https://dcsunset.github.io/task.json-web>
+<https://task-json.github.io>
 
 ## Self-hosted
 
