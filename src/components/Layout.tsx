@@ -14,7 +14,7 @@ import { RootState, rootActions } from "../store";
 import { Notification } from "../types";
 import {
 	Cog as CogIcon,
-	StickerAlertOutline as StickerCheckOutlineIcon,
+	StickerCheckOutline as StickerCheckOutlineIcon,
 	Brightness4 as Brightness4Icon,
 	Brightness7 as Brightness7Icon
 } from "mdi-material-ui";
