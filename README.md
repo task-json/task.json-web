@@ -17,7 +17,7 @@ TODO
 
 ## Online Demo
 
-<https://task-json.github.io>
+<https://task-json-web.vercel.app>
 
 ## Self-hosted
 
