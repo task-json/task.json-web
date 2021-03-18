@@ -76,6 +76,9 @@ function SettingsDialog(props: Props) {
 	const reset = () => {
 		setMaxPriorities(rootState.settings.maxPriorities.toString());
 		dispatch(rootActions.updateSettings({ token: oldToken }));
+		setPassword("");
+		setServer(settings.server ?? "");
+		setErrorPriorities(false);
 	};
 
 	const save = () => {
