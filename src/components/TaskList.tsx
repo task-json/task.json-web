@@ -234,9 +234,9 @@ function TaskList(props: Props) {
 								const a: string = obj1.data;
 								const b: string = obj2.data;
 								let result = 0;
-								if (a === null)
+								if (a === undefined)
 									result = -1;
-								if (b === null)
+								if (b === undefined)
 									result = 1;
 								if (a < b)
 									result = 1;
