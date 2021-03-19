@@ -49,7 +49,8 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(1.5)
   },
   toggleGroup: {
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(2),
+    flexWrap: "wrap"
   },
   toggleButton: {
     paddingLeft: theme.spacing(2.5),
