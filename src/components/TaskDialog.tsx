@@ -124,6 +124,7 @@ function TaskDialog(props: Props) {
 			severity: "success",
 			text: `Successfully ${props.task ? "edit" : "add"} a new task.`
 		}));
+		handleClose();
 	}
 
 	return (
