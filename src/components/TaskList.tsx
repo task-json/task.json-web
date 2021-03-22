@@ -229,6 +229,7 @@ function TaskList(props: Props) {
 					name: "priority",
 					label: "P",
 					options: {
+						sortThirdClickReset: true,
 						sortCompare(order) {
 							return (obj1, obj2) => {
 								const a: string = obj1.data;
@@ -252,7 +253,8 @@ function TaskList(props: Props) {
 					name: "text",
 					label: "Text",
 					options: {
-						filterType: "textField"
+						filterType: "textField",
+						sort: false
 					}
 				},
 				{
@@ -260,6 +262,7 @@ function TaskList(props: Props) {
 					label: "Projects",
 					options: {
 						filterType: "multiselect",
+						sort: false,
 						customBodyRenderLite: index => (
 							<>
 								{tasks[index].projects?.map(proj => (
@@ -274,6 +277,7 @@ function TaskList(props: Props) {
 					label: "Contexts",
 					options: {
 						filterType: "multiselect",
+						sort: false,
 						customBodyRenderLite: index => (
 							<>
 								{tasks[index].contexts?.map(ctx => (
@@ -287,6 +291,7 @@ function TaskList(props: Props) {
 					name: "due",
 					label: "Due",
 					options: {
+						sortThirdClickReset: true,
 						filterType: "textField",
 						customBodyRender: (row: string | null) => row && DateTime.fromISO(row).toFormat("yyyy-MM-dd")
 					}
@@ -296,6 +301,7 @@ function TaskList(props: Props) {
 					label: "Actions",
 					options: {
 						empty: true,
+						sort: false,
 						customBodyRenderLite: index => (
 							<Actions
 								taskType={props.taskType}
