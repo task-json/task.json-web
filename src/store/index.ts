@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Notification, Settings } from "../types";
-import { initTaskJson, Task, TaskJson, TaskType } from "task.json";
+import { initTaskJson, removeTasks, doTasks, undoTasks, Task, TaskJson, TaskType } from "task.json";
 import { login, syncTasks, uploadTasks, downloadTasks } from "./async-actions";
 import _ from "lodash";
 import { HttpError } from 'task.json-client';
@@ -55,52 +55,26 @@ const rootSlice = createSlice({
 			type: "todo" | "done",
 			indexes: number[]
 		}>) {
-			const date = new Date().toISOString();
 			const { type, indexes } = action.payload;
-			const removedTasks = _.remove(state.taskJson[type], (_, index) => indexes.includes(index))
-				.map(task => {
-					task.modified = date;
-					return task;
-				});
-			state.taskJson.removed.push(...removedTasks);
+			removeTasks(state.taskJson, type, indexes);
 		},
 		doTasks(state, action: PayloadAction<number[]>) {
-			const date = new Date().toISOString();
 			const indexes = action.payload;
-			const doneTasks = _.remove(state.taskJson.todo, (_, index) => indexes.includes(index))
-				.map(task => {
-					task.end = date;
-					task.modified = date;
-					return task;
-				});
-			state.taskJson.done.push(...doneTasks);
+			doTasks(state.taskJson, indexes);
 		},
 		undoTasks(state, action: PayloadAction<{
 			type: "removed" | "done",
 			indexes: number[]
 		}>) {
-			const date = new Date().toISOString();
 			const { type, indexes } = action.payload;
-			const undoneTasks = _.remove(state.taskJson[type], (_, index) => indexes.includes(index))
-				.map(task => {
-					task.modified = date;
-					return task;
-				});
-			const doneTasks = undoneTasks.filter(task => type === "removed" && task.end);
-			const todoTasks = undoneTasks.filter(task => type === "done" || !task.end);
-			todoTasks.forEach(task => {
-				delete task.end;
-				return task;
-			});
-			state.taskJson.todo.push(...todoTasks);
-			state.taskJson.done.push(...doneTasks);
+			undoTasks(state.taskJson, type, indexes);
 		},
 		modifyTask(state, action: PayloadAction<{
 			type: TaskType;
 			task: Task;
 		}>) {
 			const { type, task } = action.payload;
-			const index = state.taskJson[type].findIndex(t => t.uuid === task.uuid);
+			const index = state.taskJson[type].findIndex(t => t.id === task.id);
 			state.taskJson[type][index] = task;
 		},
 		setTaskJson(state, action: PayloadAction<TaskJson>) {

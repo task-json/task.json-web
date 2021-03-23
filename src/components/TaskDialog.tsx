@@ -100,7 +100,7 @@ function TaskDialog(props: Props) {
 
 		const date = new Date().toISOString();
 		const newTask: Task = {
-			uuid: task.uuid ?? uuidv4(),
+			id: task.id ?? uuidv4(),
 			text: task.text,
 			...(task.priority.length && { priority: task.priority }),
 			...(task.projects.length && { projects: task.projects }),
