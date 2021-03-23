@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Notification, Settings } from "../types";
-import { initTaskJson, removeTasks, doTasks, undoTasks, Task, TaskJson, TaskType } from "task.json";
+import { initTaskJson, removeTasks, doTasks, undoTasks, Task, TaskJson, TaskType, idToIndex } from "task.json";
 import { login, syncTasks, uploadTasks, downloadTasks } from "./async-actions";
 import _ from "lodash";
 import { HttpError } from 'task.json-client';
@@ -51,22 +51,26 @@ const rootSlice = createSlice({
 		addTask(state, action: PayloadAction<Task>) {
 			state.taskJson.todo.push(action.payload);
 		},
+		// Manipulate by ids
 		removeTasks(state, action: PayloadAction<{
 			type: "todo" | "done",
-			indexes: number[]
+			ids: string[]
 		}>) {
-			const { type, indexes } = action.payload;
+			const { type, ids } = action.payload;
+			const indexes = idToIndex(state.taskJson, type, ids);
 			removeTasks(state.taskJson, type, indexes);
 		},
-		doTasks(state, action: PayloadAction<number[]>) {
-			const indexes = action.payload;
+		doTasks(state, action: PayloadAction<string[]>) {
+			const ids = action.payload;
+			const indexes = idToIndex(state.taskJson, "todo", ids);
 			doTasks(state.taskJson, indexes);
 		},
 		undoTasks(state, action: PayloadAction<{
 			type: "removed" | "done",
-			indexes: number[]
+			ids: string[]
 		}>) {
-			const { type, indexes } = action.payload;
+			const { type, ids } = action.payload;
+			const indexes = idToIndex(state.taskJson, type, ids);
 			undoTasks(state.taskJson, type, indexes);
 		},
 		modifyTask(state, action: PayloadAction<{

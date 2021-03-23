@@ -8,7 +8,7 @@ import {
 	Restore as RestoreIcon,
 	Check as CheckIcon
 } from "mdi-material-ui";
-import { TaskType, Task } from "task.json";
+import { TaskType, Task, taskUrgency } from "task.json";
 import { DateTime } from "luxon";
 import { useDispatch, useSelector } from "react-redux";
 import { rootActions, RootState } from "../store";
@@ -68,11 +68,11 @@ const CustomToolbar = (props: CustomToolbarProps) => {
 
 
 interface CustomToolbarSelectProps {
-	selectedRows: number[];
+	selectedIds: string[];
 	taskType: TaskType;
-	onRemove: (indexes: number[]) => void;
-	onUndo: (indexes: number[]) => void;
-	onDo: (indexes: number[]) => void;
+	onRemove: (ids: string[]) => void;
+	onUndo: (ids: string[]) => void;
+	onDo: (ids: string[]) => void;
 };
 
 const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
@@ -84,7 +84,7 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 				<Tooltip title="Undo Tasks">
 					<IconButton
 						className={classes.add}
-						onClick={() => props.onUndo(props.selectedRows)}
+						onClick={() => props.onUndo(props.selectedIds)}
 					>
 						<RestoreIcon />
 					</IconButton>
@@ -94,7 +94,7 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 				<Tooltip title="Do Tasks">
 					<IconButton
 						className={classes.add}
-						onClick={() => props.onDo(props.selectedRows)}
+						onClick={() => props.onDo(props.selectedIds)}
 					>
 						<CheckIcon />
 					</IconButton>
@@ -104,7 +104,7 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 				<Tooltip title="Remove Tasks">
 					<IconButton
 						className={classes.del}
-						onClick={() => props.onRemove(props.selectedRows)}
+						onClick={() => props.onRemove(props.selectedIds)}
 					>
 						<DeleteIcon />
 					</IconButton>
@@ -117,11 +117,10 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 interface ActionsProps {
 	taskType: TaskType;
 	task: Task;
-	index: number;
-	onRemove: (indexes: number[]) => void;
-	onUndo: (indexes: number[]) => void;
+	onRemove: (ids: string[]) => void;
+	onUndo: (ids: string[]) => void;
+	onDo: (ids: string[]) => void;
 	onEdit: (task: Task) => void;
-	onDo: (indexes: number[]) => void;
 };
 
 const Actions = (props: ActionsProps) => {
@@ -134,7 +133,7 @@ const Actions = (props: ActionsProps) => {
 					<IconButton
 						className={`${classes.add} ${classes.actionButton}`}
 						size="small"
-						onClick={() => props.onDo([props.index])}
+						onClick={() => props.onDo([props.task.id])}
 					>
 						<CheckIcon />
 					</IconButton>
@@ -145,7 +144,7 @@ const Actions = (props: ActionsProps) => {
 					<IconButton
 						className={`${classes.add} ${classes.actionButton}`}
 						size="small"
-						onClick={() => props.onUndo([props.index])}
+						onClick={() => props.onUndo([props.task.id])}
 					>
 						<RestoreIcon />
 					</IconButton>
@@ -165,7 +164,7 @@ const Actions = (props: ActionsProps) => {
 					<IconButton
 						className={`${classes.del} ${classes.actionButton}`}
 						size="small"
-						onClick={() => props.onRemove([props.index])}
+						onClick={() => props.onRemove([props.task.id])}
 					>
 						<DeleteIcon />
 					</IconButton>
@@ -178,28 +177,35 @@ const Actions = (props: ActionsProps) => {
 function TaskList(props: Props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-	const tasks = useSelector((state: RootState) => state.taskJson[props.taskType]);
+	// sorted tasks
+	const tasks = useSelector(
+		(state: RootState) => (
+			state.taskJson[props.taskType].sort(
+				(a, b) => taskUrgency(a) - taskUrgency(b)
+			)
+		)
+	);
 
-	const removeTasks = (indexes: number[]) => {
+	const removeTasks = (ids: string[]) => {
 		if (props.taskType !== "removed") {
 			dispatch(rootActions.removeTasks({
 				type: props.taskType,
-				indexes
+				ids
 			}));
 		}
 	};
 
-	const undoTasks = (indexes: number[]) => {
+	const undoTasks = (ids: string[]) => {
 		if (props.taskType !== "todo") {
 			dispatch(rootActions.undoTasks({
 				type: props.taskType,
-				indexes
+				ids
 			}));
 		}
 	};
 
-	const doTasks = (indexes: number[]) => {
-		dispatch(rootActions.doTasks(indexes));
+	const doTasks = (ids: string[]) => {
+		dispatch(rootActions.doTasks(ids));
 	};
 
 	return (
@@ -212,11 +218,11 @@ function TaskList(props: Props) {
 					return <CustomToolbar onAdd={props.onAdd} />
 				},
 				customToolbarSelect: (selectedRows) => {
-					const indexes = selectedRows.data.map(({ dataIndex }) => dataIndex);
+					const ids = selectedRows.data.map(({ dataIndex }) => tasks[dataIndex].id);
 					return (
 						<CustomToolbarSelect
 							taskType={props.taskType}
-							selectedRows={indexes}
+							selectedIds={ids}
 							onRemove={removeTasks}
 							onUndo={undoTasks}
 							onDo={doTasks}
@@ -306,7 +312,6 @@ function TaskList(props: Props) {
 							<Actions
 								taskType={props.taskType}
 								task={tasks[index]}
-								index={index}
 								onEdit={props.onEdit}
 								onRemove={removeTasks}
 								onUndo={undoTasks}
