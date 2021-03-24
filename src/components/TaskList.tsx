@@ -1,4 +1,4 @@
-import { green, red, blue } from "@material-ui/core/colors"
+import { green, red, blue, cyan, amber } from "@material-ui/core/colors"
 import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
 import MUIDataTable from "mui-datatables";
 import {
@@ -45,6 +45,18 @@ const useStyles = makeStyles(theme => ({
 		marginRight: theme.spacing(1),
 		marginTop: theme.spacing(0.5),
 		marginBottom: theme.spacing(0.5)
+	},
+	cyan: {
+		fontWeight: 500,
+		color: theme.palette.type === "dark" ? cyan[500] : cyan[600] 
+	},
+	red: {
+		fontWeight: 500,
+		color: red[400]
+	},
+	amber: {
+		fontWeight: 500,
+		color: theme.palette.type === "dark" ? amber[500] : amber[800] 
 	}
 }));
 
@@ -180,8 +192,11 @@ function TaskList(props: Props) {
 	// sorted tasks
 	const tasks = useSelector(
 		(state: RootState) => (
-			state.taskJson[props.taskType].sort(
-				(a, b) => taskUrgency(a) - taskUrgency(b)
+			state.taskJson[props.taskType].map(task => ({
+				...task,
+				due: task.due && DateTime.fromISO(task.due).toFormat("yyyy-MM-dd")
+			})).sort(
+				(a, b) => taskUrgency(b) - taskUrgency(a)
 			)
 		)
 	);
@@ -206,6 +221,17 @@ function TaskList(props: Props) {
 
 	const doTasks = (ids: string[]) => {
 		dispatch(rootActions.doTasks(ids));
+	};
+
+	const colorTask = (task: Task) => {
+		const urgency = taskUrgency(task);
+		if (urgency >= 1000)
+			return classes.red;
+		if (urgency >= 100)
+			return classes.amber;
+		if (urgency >= 1)
+			return classes.cyan;
+		return "";
 	};
 
 	return (
@@ -252,7 +278,10 @@ function TaskList(props: Props) {
 
 								return result * (order === "asc" ? 1 : -1);
 							};
-						}
+						},
+						customBodyRenderLite: index => (
+							<span className={colorTask(tasks[index])}>{tasks[index].priority}</span>
+						)
 					}
 				},
 				{
@@ -260,7 +289,10 @@ function TaskList(props: Props) {
 					label: "Text",
 					options: {
 						filterType: "textField",
-						sort: false
+						sort: false,
+						customBodyRenderLite: index => (
+							<span className={colorTask(tasks[index])}>{tasks[index].text}</span>
+						)
 					}
 				},
 				{
@@ -299,7 +331,9 @@ function TaskList(props: Props) {
 					options: {
 						sortThirdClickReset: true,
 						filterType: "textField",
-						customBodyRender: (row: string | null) => row && DateTime.fromISO(row).toFormat("yyyy-MM-dd")
+						customBodyRenderLite: index => (
+							<span className={colorTask(tasks[index])}>{tasks[index].due}</span>
+						)
 					}
 				},
 				{
