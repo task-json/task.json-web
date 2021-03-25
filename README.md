@@ -1,5 +1,7 @@
 # task.json-web
 
+![Build](https://github.com/DCsunset/task.json-web/actions/workflows/release.yml/badge.svg)
+
 Task management app with Web UI written in React.js based on [task.json](https://github.com/DCsunset/task.json) format.
 
 
