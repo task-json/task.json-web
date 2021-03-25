@@ -26,6 +26,10 @@ type Props = {
 };
 
 const useStyles = makeStyles(theme => ({
+	content: {
+		paddingTop: theme.spacing(3),
+		paddingBottom: theme.spacing(3)
+	},
 	icon: {
 		marginRight: theme.spacing(2)
 	},
@@ -117,7 +121,9 @@ function Layout(props: Props) {
 				</Snackbar>
 			))}
 
-			{props.children}
+			<div className={classes.content}>
+				{props.children}
+			</div>
 		</>
 	);
 }

@@ -41,7 +41,6 @@ const createTheme = (dark: boolean) => createMuiTheme({
 
 const useStyles = makeStyles(theme => ({
   head: {
-    marginTop: theme.spacing(3),
     marginBottom: theme.spacing(2)
   },
   select: {
