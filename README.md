@@ -3,9 +3,9 @@
 Task management app with Web UI written in React.js based on [task.json](https://github.com/DCsunset/task.json) format.
 
 
-## Screenshots
+## Screenshot
 
-TODO
+![Screenshot](./screenshots/screenshot.png)
 
 
 ## Features
@@ -18,6 +18,8 @@ TODO
 ## Online Demo
 
 <https://task-json-web.vercel.app>
+
+Note: the demo is a static page and the data will be stored in your browser's local storage.
 
 ## Self-hosted
 
