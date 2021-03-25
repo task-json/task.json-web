@@ -1,19 +1,9 @@
 name: Build and Release
 
 on:
-  release:
-    types:
-      - published
-      - created
-      - released
   push:
-    branches:
-      - master
-      - v*
-  pull_request:
-    branches:
-      - master
-      - v*
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -49,7 +39,6 @@ jobs:
 
       - name: Upload to GitHub release
         uses: svenstaro/upload-release-action@v2
-        if: github.event_name == 'release'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./${{ steps.info.outputs.RELEASE_NAME }}.zip
