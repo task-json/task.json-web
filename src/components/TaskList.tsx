@@ -189,17 +189,31 @@ const Actions = (props: ActionsProps) => {
 function TaskList(props: Props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-	// sorted tasks
-	const tasks = useSelector(
+
+	const originalTasks = useSelector(
 		(state: RootState) => (
 			state.taskJson[props.taskType].map(task => ({
 				...task,
 				due: task.due && DateTime.fromISO(task.due).toFormat("yyyy-MM-dd")
-			})).sort(
-				(a, b) => taskUrgency(b) - taskUrgency(a)
-			)
+			}))
 		)
 	);
+
+	// sorted tasks
+	let tasks: Task[];
+	// Map<id, urgency>
+	const urgencyMap = new Map<string, number>();
+	if (props.taskType === "todo") {
+		for (const task of originalTasks) {
+			urgencyMap.set(task.id, taskUrgency(task));
+		}
+		tasks = originalTasks.sort(
+			(a, b) => urgencyMap.get(b.id)! - urgencyMap.get(a.id)!
+		);
+	}
+	else {
+		tasks = originalTasks;
+	}
 
 	const removeTasks = (ids: string[]) => {
 		if (props.taskType !== "removed") {
@@ -224,7 +238,11 @@ function TaskList(props: Props) {
 	};
 
 	const colorTask = (task: Task) => {
-		const urgency = taskUrgency(task);
+		// Only color todo tasks
+		if (props.taskType !== "todo")
+			return "";
+
+		const urgency = urgencyMap.get(task.id)!;
 		if (urgency >= 1000)
 			return classes.red;
 		if (urgency >= 100)

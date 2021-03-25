@@ -122,7 +122,7 @@ function TaskDialog(props: Props) {
 
 		dispatch(rootActions.addNotification({
 			severity: "success",
-			text: `Successfully ${props.task ? "edit" : "add"} a new task.`
+			text: `Successfully ${props.task ? "edit" : "add"} a task.`
 		}));
 		handleClose();
 	}

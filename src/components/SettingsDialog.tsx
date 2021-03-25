@@ -117,6 +117,10 @@ function SettingsDialog(props: Props) {
 	
 	const clearData = () => {
 		dispatch(rootActions.setTaskJson(initTaskJson()));
+		dispatch(rootActions.addNotification({
+			severity: "success",
+			text: "Successfully cleared data"
+		}))
 	};
 	const login = () => {
 		dispatch(asyncActions.login({
