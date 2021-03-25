@@ -5,9 +5,11 @@
 Task management app with Web UI written in React.js based on [task.json](https://github.com/DCsunset/task.json) format.
 
 
-## Screenshot
+## Screenshots
 
-![Screenshot](./screenshots/screenshot.png)
+![Light theme](./screenshots/screenshot-light.png)
+
+![Dark theme](./screenshots/screenshot-dark.png)
 
 
 ## Features
@@ -15,6 +17,7 @@ Task management app with Web UI written in React.js based on [task.json](https:/
 * Material Design UI
 * Local storage for all data (no back-end server)
 * Task synchronization with `task.json-server`
+* Dark and light themes
 
 
 ## Online Demo
