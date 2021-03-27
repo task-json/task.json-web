@@ -28,10 +28,11 @@ import {
 	Export as ExportIcon,
 	Delete as DeleteIcon
 } from "mdi-material-ui";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 interface Props {
-	open: boolean,
-	onClose: () => void
+	open: boolean;
+	onClose: () => void;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -72,6 +73,8 @@ function SettingsDialog(props: Props) {
 	const [server, setServer] = useState(settings.server ?? "");
 	const [password, setPassword] = useState("");
 	const [oldToken, setOldToken] = useState(settings.token ?? "");
+	const [confirmationText, setConfirmationText] = useState("");
+	const [confirmationDialog, setConfirmationDialog] = useState(false);
 
 	const reset = () => {
 		setMaxPriorities(rootState.settings.maxPriorities.toString());
@@ -114,14 +117,22 @@ function SettingsDialog(props: Props) {
 		], { type: "text/plain;charset=utf-8" });
 		FileSaver.saveAs(blob, "task.json");
 	};
-	
+
 	const clearData = () => {
 		dispatch(rootActions.setTaskJson(initTaskJson()));
 		dispatch(rootActions.addNotification({
 			severity: "success",
 			text: "Successfully cleared data"
-		}))
+		}));
 	};
+	const handleClearCancel = () => {
+		setConfirmationDialog(false);
+	};
+	const handleClearData = () => {
+		setConfirmationText("Warning: This will clear all the data in the local storage. Are you sure to clear?");
+		setConfirmationDialog(true);
+	};
+
 	const login = () => {
 		dispatch(asyncActions.login({
 			server,
@@ -152,6 +163,13 @@ function SettingsDialog(props: Props) {
 		>
 			<DialogTitle className={classes.title}>Settings</DialogTitle>
 			<DialogContent>
+				<ConfirmationDialog
+					open={confirmationDialog}
+					text={confirmationText}
+					onCancel={handleClearCancel}
+					onConfirm={clearData}
+				/>
+
 				<List>
 					<div className={classes.divider}>
 						<Typography color="textSecondary" className={classes.subtitle}>
@@ -226,7 +244,7 @@ function SettingsDialog(props: Props) {
 									</IconButton>
 								</label>
 								<IconButton
-									onClick={clearData}
+									onClick={handleClearData}
 									className={`${classes.dataButton} ${classes.red}`}
 									title="Clear"
 								>

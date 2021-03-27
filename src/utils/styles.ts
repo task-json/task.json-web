@@ -10,7 +10,7 @@ export const redBgStyle = (theme: Theme): CSSProperties => ({
 	}
 });
 
-export const redStyle = (theme: Theme): CSSProperties => ({
+export const redStyle = (_theme: Theme): CSSProperties => ({
 	color: red[500],
 	"&:hover": {
 		backgroundColor: fade(red[500], 0.05)

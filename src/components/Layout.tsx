@@ -21,8 +21,8 @@ import {
 import SettingsDialog from "./SettingsDialog";
 import { blue } from '@material-ui/core/colors';
 
-type Props = {
-	children?: any
+interface Props {
+	children?: any;
 };
 
 const useStyles = makeStyles(theme => ({
