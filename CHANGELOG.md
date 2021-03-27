@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/DCsunset/task.json-web/compare/v1.0.0...v1.1.0) (2021-03-27)
+
+
+### Features
+
+* add confirmation dialog ([b6f6496](https://github.com/DCsunset/task.json-web/commit/b6f649689ba9af0dd33898304b66ff9489e9b006))
+
 ## 1.0.0 (2021-03-25)
 
 
