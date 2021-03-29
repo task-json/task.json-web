@@ -38,12 +38,14 @@ jobs:
         run: |
           cd build
           zip -9 -r ../$RELEASE_NAME.zip .
+          tar -cavf ../$RELEASE_NAME.tar.zst .
 
       - name: Upload to GitHub release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./${{ steps.info.outputs.RELEASE_NAME }}.zip
+          file_glob: true
+          file: ./${{ steps.info.outputs.RELEASE_NAME }}.*
           tag: ${{ github.ref }}
           overwrite: true
 
