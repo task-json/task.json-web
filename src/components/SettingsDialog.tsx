@@ -119,6 +119,7 @@ function SettingsDialog(props: Props) {
 	};
 
 	const clearData = () => {
+		setConfirmationDialog(false);
 		dispatch(rootActions.setTaskJson(initTaskJson()));
 		dispatch(rootActions.addNotification({
 			severity: "success",

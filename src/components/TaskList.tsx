@@ -13,6 +13,8 @@ import { TaskType, Task, taskUrgency } from "task.json";
 import { DateTime } from "luxon";
 import { useDispatch, useSelector } from "react-redux";
 import { rootActions, RootState } from "../store";
+import { useState } from "react";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 interface Props {
 	onAdd: () => void;
@@ -81,12 +83,11 @@ const CustomToolbar = (props: CustomToolbarProps) => {
 
 
 interface CustomToolbarSelectProps {
-	selectedIds: string[];
 	taskType: TaskType;
-	onRemove: (ids: string[]) => void;
-	onErase: (ids: string[]) => void;
-	onUndo: (ids: string[]) => void;
-	onDo: (ids: string[]) => void;
+	onRemove: () => void;
+	onErase: () => void;
+	onUndo: () => void;
+	onDo: () => void;
 };
 
 const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
@@ -98,7 +99,7 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 				<Tooltip title="Undo Tasks">
 					<IconButton
 						className={classes.add}
-						onClick={() => props.onUndo(props.selectedIds)}
+						onClick={props.onUndo}
 					>
 						<RestoreIcon />
 					</IconButton>
@@ -108,7 +109,7 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 				<Tooltip title="Do Tasks">
 					<IconButton
 						className={classes.add}
-						onClick={() => props.onDo(props.selectedIds)}
+						onClick={props.onDo}
 					>
 						<CheckIcon />
 					</IconButton>
@@ -118,7 +119,7 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 				<Tooltip title="Remove Tasks">
 					<IconButton
 						className={classes.del}
-						onClick={() => props.onRemove(props.selectedIds)}
+						onClick={props.onRemove}
 					>
 						<DeleteIcon />
 					</IconButton>
@@ -128,7 +129,7 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 				<Tooltip title="Erase Tasks">
 					<IconButton
 						className={classes.del}
-						onClick={() => props.onErase(props.selectedIds)}
+						onClick={props.onErase}
 					>
 						<CloseIcon />
 					</IconButton>
@@ -211,6 +212,9 @@ const Actions = (props: ActionsProps) => {
 };
 
 function TaskList(props: Props) {
+	const [confirmationText, setConfirmationText] = useState("");
+	const [confirmationDialog, setConfirmationDialog] = useState(false);
+	const [eraseIds, setEraseIds] = useState([] as string[]);
 	const classes = useStyles();
 	const dispatch = useDispatch();
 
@@ -248,8 +252,17 @@ function TaskList(props: Props) {
 		}
 	};
 
-	const eraseTasks = (ids: string[]) => {
-		dispatch(rootActions.eraseTasks(ids));
+	const handleEraseCancel = () => {
+		setConfirmationDialog(false);
+	};
+	const handleErase = (ids: string[]) => {
+		setEraseIds(ids);
+		setConfirmationText("Warning: This will delete tasks permanently. Make sure the erased tasks are not in other servers and clients if you want to sync with them. Are you sure to erase?");
+		setConfirmationDialog(true);
+	};
+	const eraseTasks = () => {
+		setConfirmationDialog(false);
+		dispatch(rootActions.eraseTasks(eraseIds));
 	};
 
 	const undoTasks = (ids: string[]) => {
@@ -281,130 +294,150 @@ function TaskList(props: Props) {
 	};
 
 	return (
-		<MUIDataTable
-			title=""
-			options={{
-				print: false,
-				download: false,
-				customToolbar: () => {
-					return <CustomToolbar onAdd={props.onAdd} />
-				},
-				customToolbarSelect: (selectedRows) => {
-					const ids = selectedRows.data.map(({ dataIndex }) => tasks[dataIndex].id);
-					return (
-						<CustomToolbarSelect
-							taskType={props.taskType}
-							selectedIds={ids}
-							onRemove={removeTasks}
-							onErase={eraseTasks}
-							onUndo={undoTasks}
-							onDo={doTasks}
-						/>
-					);
-				}
-			}}
-			columns={[
-				{
-					name: "priority",
-					label: "P",
-					options: {
-						sortThirdClickReset: true,
-						sortCompare(order) {
-							return (obj1, obj2) => {
-								const a: string = obj1.data;
-								const b: string = obj2.data;
-								let result = 0;
-								if (a === undefined)
-									result = -1;
-								if (b === undefined)
-									result = 1;
-								if (a < b)
-									result = 1;
-								else if (a > b)
-									result = -1;
-
-								return result * (order === "asc" ? 1 : -1);
-							};
-						},
-						customBodyRenderLite: index => (
-							<span className={colorTask(tasks[index])}>{tasks[index].priority}</span>
-						)
-					}
-				},
-				{
-					name: "text",
-					label: "Text",
-					options: {
-						filterType: "textField",
-						sort: false,
-						customBodyRenderLite: index => (
-							<span className={colorTask(tasks[index])}>{tasks[index].text}</span>
-						)
-					}
-				},
-				{
-					name: "projects",
-					label: "Projects",
-					options: {
-						filterType: "multiselect",
-						sort: false,
-						customBodyRenderLite: index => (
-							<>
-								{tasks[index].projects?.map(proj => (
-									<Chip className={classes.chip} label={proj} key={proj} />
-								))}
-							</>
-						)
-					}
-				},
-				{
-					name: "contexts",
-					label: "Contexts",
-					options: {
-						filterType: "multiselect",
-						sort: false,
-						customBodyRenderLite: index => (
-							<>
-								{tasks[index].contexts?.map(ctx => (
-									<Chip className={classes.chip} label={ctx} key={ctx} />
-								))}
-							</>
-						)
-					}
-				},
-				{
-					name: "due",
-					label: "Due",
-					options: {
-						sortThirdClickReset: true,
-						filterType: "textField",
-						customBodyRenderLite: index => (
-							<span className={colorTask(tasks[index])}>{tasks[index].due}</span>
-						)
-					}
-				},
-				{
-					name: "actions",
-					label: "Actions",
-					options: {
-						empty: true,
-						sort: false,
-						customBodyRenderLite: index => (
-							<Actions
+		<>
+			<ConfirmationDialog
+				open={confirmationDialog}
+				text={confirmationText}
+				onCancel={handleEraseCancel}
+				onConfirm={eraseTasks}
+			/>
+			<MUIDataTable
+				title=""
+				options={{
+					print: false,
+					download: false,
+					customToolbar: () => {
+						return <CustomToolbar onAdd={props.onAdd} />
+					},
+					customToolbarSelect: (selectedRows, _, setSelectedRows) => {
+						const ids = selectedRows.data.map(({ dataIndex }) => tasks[dataIndex].id);
+						return (
+							<CustomToolbarSelect
 								taskType={props.taskType}
-								task={tasks[index]}
-								onEdit={props.onEdit}
-								onRemove={removeTasks}
-								onErase={eraseTasks}
-								onUndo={undoTasks}
-								onDo={doTasks}
+								onRemove={() => {
+									setSelectedRows([]);
+									removeTasks(ids);
+								}}
+								onErase={() => {
+									// When focus is lost, the selected rows will be cleared automatically
+									// setSelectedRows([]);
+									handleErase(ids);
+								}}
+								onUndo={() => {
+									setSelectedRows([]);
+									undoTasks(ids);
+								}}
+								onDo={() => {
+									setSelectedRows([]);
+									doTasks(ids);
+								}}
 							/>
-						)
+						);
 					}
-				}
-			]}
-			data={tasks}
-		/>
+				}}
+				columns={[
+					{
+						name: "priority",
+						label: "P",
+						options: {
+							sortThirdClickReset: true,
+							sortCompare(order) {
+								return (obj1, obj2) => {
+									const a: string = obj1.data;
+									const b: string = obj2.data;
+									let result = 0;
+									if (a === undefined)
+										result = -1;
+									if (b === undefined)
+										result = 1;
+									if (a < b)
+										result = 1;
+									else if (a > b)
+										result = -1;
+
+									return result * (order === "asc" ? 1 : -1);
+								};
+							},
+							customBodyRenderLite: index => (
+								<span className={colorTask(tasks[index])}>{tasks[index].priority}</span>
+							)
+						}
+					},
+					{
+						name: "text",
+						label: "Text",
+						options: {
+							filterType: "textField",
+							sort: false,
+							customBodyRenderLite: index => (
+								<span className={colorTask(tasks[index])}>{tasks[index].text}</span>
+							)
+						}
+					},
+					{
+						name: "projects",
+						label: "Projects",
+						options: {
+							filterType: "multiselect",
+							sort: false,
+							customBodyRenderLite: index => (
+								<>
+									{tasks[index].projects?.map(proj => (
+										<Chip className={classes.chip} label={proj} key={proj} />
+									))}
+								</>
+							)
+						}
+					},
+					{
+						name: "contexts",
+						label: "Contexts",
+						options: {
+							filterType: "multiselect",
+							sort: false,
+							customBodyRenderLite: index => (
+								<>
+									{tasks[index].contexts?.map(ctx => (
+										<Chip className={classes.chip} label={ctx} key={ctx} />
+									))}
+								</>
+							)
+						}
+					},
+					{
+						name: "due",
+						label: "Due",
+						options: {
+							sortThirdClickReset: true,
+							filterType: "textField",
+							customBodyRenderLite: index => (
+								<span className={colorTask(tasks[index])}>{tasks[index].due}</span>
+							)
+						}
+					},
+					{
+						name: "actions",
+						label: "Actions",
+						options: {
+							empty: true,
+							sort: false,
+							customBodyRenderLite: index => (
+								<Actions
+									taskType={props.taskType}
+									task={tasks[index]}
+									onEdit={props.onEdit}
+									onRemove={removeTasks}
+									onErase={handleErase}
+									onUndo={undoTasks}
+									onDo={doTasks}
+								/>
+							)
+						}
+					}
+				]}
+				data={tasks}
+			/>
+		</>
 	);
 }
 
