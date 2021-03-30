@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Notification, Settings } from "../types";
-import { initTaskJson, removeTasks, doTasks, undoTasks, Task, TaskJson, TaskType, idToIndex } from "task.json";
+import { initTaskJson, removeTasks, eraseTasks, doTasks, undoTasks, Task, TaskJson, TaskType, idToIndex } from "task.json";
 import { login, syncTasks, uploadTasks, downloadTasks } from "./async-actions";
 import _ from "lodash";
 import { HttpError } from 'task.json-client';
@@ -59,6 +59,11 @@ const rootSlice = createSlice({
 			const { type, ids } = action.payload;
 			const indexes = idToIndex(state.taskJson, type, ids);
 			removeTasks(state.taskJson, type, indexes);
+		},
+		eraseTasks(state, action: PayloadAction<string[]>) {
+			const ids = action.payload;
+			const indexes = idToIndex(state.taskJson, "removed", ids);
+			eraseTasks(state.taskJson, indexes);
 		},
 		doTasks(state, action: PayloadAction<string[]>) {
 			const ids = action.payload;

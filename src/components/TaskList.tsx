@@ -6,7 +6,8 @@ import {
 	Delete as DeleteIcon,
 	Pencil as PencilIcon,
 	Restore as RestoreIcon,
-	Check as CheckIcon
+	Check as CheckIcon,
+	Close as CloseIcon
 } from "mdi-material-ui";
 import { TaskType, Task, taskUrgency } from "task.json";
 import { DateTime } from "luxon";
@@ -83,6 +84,7 @@ interface CustomToolbarSelectProps {
 	selectedIds: string[];
 	taskType: TaskType;
 	onRemove: (ids: string[]) => void;
+	onErase: (ids: string[]) => void;
 	onUndo: (ids: string[]) => void;
 	onDo: (ids: string[]) => void;
 };
@@ -122,6 +124,16 @@ const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
 					</IconButton>
 				</Tooltip>
 			}
+			{props.taskType === "removed" &&
+				<Tooltip title="Erase Tasks">
+					<IconButton
+						className={classes.del}
+						onClick={() => props.onErase(props.selectedIds)}
+					>
+						<CloseIcon />
+					</IconButton>
+				</Tooltip>
+			}
 		</div>
 	);
 };
@@ -130,6 +142,7 @@ interface ActionsProps {
 	taskType: TaskType;
 	task: Task;
 	onRemove: (ids: string[]) => void;
+	onErase: (ids: string[]) => void;
 	onUndo: (ids: string[]) => void;
 	onDo: (ids: string[]) => void;
 	onEdit: (task: Task) => void;
@@ -182,6 +195,17 @@ const Actions = (props: ActionsProps) => {
 					</IconButton>
 				</Tooltip>
 			}
+			{props.taskType === "removed" &&
+				<Tooltip title="Erase">
+					<IconButton
+						className={`${classes.del} ${classes.actionButton}`}
+						size="small"
+						onClick={() => props.onErase([props.task.id])}
+					>
+						<CloseIcon />
+					</IconButton>
+				</Tooltip>
+			}
 		</>
 	);
 };
@@ -222,6 +246,10 @@ function TaskList(props: Props) {
 				ids
 			}));
 		}
+	};
+
+	const eraseTasks = (ids: string[]) => {
+		dispatch(rootActions.eraseTasks(ids));
 	};
 
 	const undoTasks = (ids: string[]) => {
@@ -268,6 +296,7 @@ function TaskList(props: Props) {
 							taskType={props.taskType}
 							selectedIds={ids}
 							onRemove={removeTasks}
+							onErase={eraseTasks}
 							onUndo={undoTasks}
 							onDo={doTasks}
 						/>
@@ -366,6 +395,7 @@ function TaskList(props: Props) {
 								task={tasks[index]}
 								onEdit={props.onEdit}
 								onRemove={removeTasks}
+								onErase={eraseTasks}
 								onUndo={undoTasks}
 								onDo={doTasks}
 							/>
