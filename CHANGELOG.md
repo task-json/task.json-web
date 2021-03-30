@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/DCsunset/task.json-web/compare/v1.1.0...v1.2.0) (2021-03-30)
+
+
+### Features
+
+* add erasing operation ([08c4809](https://github.com/DCsunset/task.json-web/commit/08c48092c0c2f4ea37bddbe797e26c21607bb697))
+
+
+### Bug Fixes
+
+* add confirmation for erasing and fix some bugs ([4f06341](https://github.com/DCsunset/task.json-web/commit/4f06341d701a9e07ee1f48550e4659921964adb1))
+* show add button only on todo tab ([ff232a6](https://github.com/DCsunset/task.json-web/commit/ff232a6114f1c5c07292a8ea099763a83790c785))
+
 ## [1.1.0](https://github.com/DCsunset/task.json-web/compare/v1.0.0...v1.1.0) (2021-03-27)
 
 
