@@ -65,7 +65,8 @@ const useStyles = makeStyles(theme => ({
 
 
 interface CustomToolbarProps {
-	onAdd: () => void
+	taskType: TaskType;
+	onAdd: () => void;
 };
 
 // The actions are appended to the original toolbar actions
@@ -73,11 +74,15 @@ const CustomToolbar = (props: CustomToolbarProps) => {
 	const classes = useStyles();
 
 	return (
-		<Tooltip title="Add Task">
-			<IconButton className={classes.add} onClick={props.onAdd}>
-				<PlusIcon />
-			</IconButton>
-		</Tooltip>
+		<>
+			{props.taskType === "todo" &&
+				<Tooltip title="Add Task">
+					<IconButton className={classes.add} onClick={props.onAdd}>
+						<PlusIcon />
+					</IconButton>
+				</Tooltip>
+			}
+		</>
 	);
 };
 
@@ -307,7 +312,7 @@ function TaskList(props: Props) {
 					print: false,
 					download: false,
 					customToolbar: () => {
-						return <CustomToolbar onAdd={props.onAdd} />
+						return <CustomToolbar taskType={props.taskType} onAdd={props.onAdd} />
 					},
 					customToolbarSelect: (selectedRows, _, setSelectedRows) => {
 						const ids = selectedRows.data.map(({ dataIndex }) => tasks[dataIndex].id);
