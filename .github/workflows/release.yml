@@ -25,7 +25,7 @@ jobs:
       - name: Info
         id: info
         run: |
-          export _NAME="task.json-web-${GITHUB_REF#refs/heads/}"
+          export _NAME="task.json-web-${GITHUB_REF#refs/tags/}"
           echo "::set-output name=RELEASE_NAME::$_NAME"
           echo "RELEASE_NAME=$_NAME" >> $GITHUB_ENV
 
