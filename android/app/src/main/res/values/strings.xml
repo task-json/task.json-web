@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">task.json</string>
+    <string name="title_activity_main">task.json</string>
+    <string name="package_name">org.task_json.app</string>
+    <string name="custom_url_scheme">org.task_json.app</string>
+</resources>
