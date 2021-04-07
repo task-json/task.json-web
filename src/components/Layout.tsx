@@ -76,7 +76,7 @@ function Layout(props: Props) {
 				<Toolbar>
 					<StickerCheckOutlineIcon className={classes.icon} />
 					<Typography variant="h6" noWrap className={classes.title}>
-						Task.json WebUI
+						Task.json Web
 					</Typography>
 
 					<IconButton

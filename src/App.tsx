@@ -12,7 +12,8 @@ import {
   fade,
   CssBaseline,
   createMuiTheme,
-  ThemeProvider
+  ThemeProvider,
+  useMediaQuery
 } from '@material-ui/core';
 import {
   ToggleButton,
@@ -76,6 +77,8 @@ function App() {
   const [taskType, setTaskType] = useState<TaskType>("todo");
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
 
+  const isSmallDevice = useMediaQuery(theme.breakpoints.down("xs"));
+
   const handleTaskType = (_event: React.MouseEvent<HTMLElement>, newType: TaskType | null) => {
     if (newType)
       setTaskType(newType);
@@ -109,15 +112,15 @@ function App() {
           >
             <ToggleButton value="todo" className={classes.toggleButton}>
               <ScheduleIcon className={classes.icon} />
-              todo
+              { isSmallDevice || "todo" }
             </ToggleButton>
             <ToggleButton value="done" className={classes.toggleButton}>
               <CheckIcon className={classes.icon} />
-              done
+              { isSmallDevice || "done" }
             </ToggleButton>
             <ToggleButton value="removed" className={classes.toggleButton}>
               <DeleteIcon className={classes.icon} />
-              removed
+              { isSmallDevice || "removed" }
             </ToggleButton>
           </ToggleButtonGroup>
 
