@@ -13,8 +13,8 @@
     "@material-ui/pickers": "^3.3.10",
     "@reduxjs/toolkit": "^1.5.1",
     "@testing-library/jest-dom": "^5.11.10",
-    "@testing-library/react": "^11.2.5",
-    "@testing-library/user-event": "^13.0.16",
+    "@testing-library/react": "^11.2.6",
+    "@testing-library/user-event": "^13.1.1",
     "@types/jest": "^26.0.22",
     "@types/node": "^14.14.37",
     "@types/react": "^17.0.3",
@@ -23,7 +23,7 @@
     "lodash": "^4.17.21",
     "luxon": "^1.26.0",
     "mdi-material-ui": "^6.22.0",
-    "mui-datatables": "^3.7.6",
+    "mui-datatables": "^3.7.7",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.3",
@@ -65,11 +65,12 @@
   "devDependencies": {
     "@types/file-saver": "^2.0.1",
     "@types/lodash": "^4.14.168",
-    "@types/luxon": "^1.26.2",
+    "@types/luxon": "^1.26.3",
     "@types/mui-datatables": "^3.7.1",
     "@types/react-redux": "^7.1.16",
     "@types/react-router-dom": "^5.1.7",
     "@types/uuid": "^8.3.0",
-    "standard-version": "^9.1.1"
+    "cordova-res": "^0.15.3",
+    "standard-version": "^9.2.0"
   }
 }
