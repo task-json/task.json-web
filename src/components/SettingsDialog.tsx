@@ -12,7 +12,9 @@ import {
 	ListItemText,
 	makeStyles,
 	TextField,
-	Typography
+	Typography,
+	useTheme,
+	useMediaQuery
 } from "@material-ui/core";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -57,6 +59,10 @@ const useStyles = makeStyles(theme => ({
 		marginRight: theme.spacing(2),
 		marginTop: theme.spacing(2)
 	},
+	smallPadding: {
+		paddingLeft: theme.spacing(1),
+		paddingRight: theme.spacing(1)
+	},
 	red: redStyle(theme),
 	redBg: redBgStyle(theme)
 }));
@@ -66,6 +72,9 @@ function SettingsDialog(props: Props) {
 	const rootState = useSelector((state: RootState) => state);
 	const settings = rootState.settings;
 	const dispatch = useDispatch();
+
+	const theme = useTheme();
+  const isSmallDevice = useMediaQuery(theme.breakpoints.down("xs"));
 
 	// Local states
 	const [maxPriorities, setMaxPriorities] = useState(rootState.settings.maxPriorities.toString());
@@ -163,7 +172,7 @@ function SettingsDialog(props: Props) {
 			fullWidth
 		>
 			<DialogTitle className={classes.title}>Settings</DialogTitle>
-			<DialogContent>
+			<DialogContent className={isSmallDevice ? classes.smallPadding : ""}>
 				<ConfirmationDialog
 					open={confirmationDialog}
 					text={confirmationText}
