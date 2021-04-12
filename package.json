@@ -43,7 +43,8 @@
     "sync": "cordova-res android --icon-background-source '#FFFFFF' --skip-config --copy && cap sync",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "release": "standard-version"
+    "release": "standard-version",
+    "upload": "./scripts/upload-apk.sh"
   },
   "eslintConfig": {
     "extends": [
