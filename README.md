@@ -18,6 +18,7 @@ Task management app with Web UI written in React.js based on [task.json](https:/
 * Local storage for all data (no back-end server)
 * Task synchronization with `task.json-server`
 * Dark and light themes
+* Support for Android
 
 
 ## Online Demo
@@ -26,11 +27,14 @@ Task management app with Web UI written in React.js based on [task.json](https:/
 
 Note: the demo is a static page and the data will be stored in your browser's local storage.
 
-## Self-hosted
+## Releases
 
-Download the package in GitHub release.
-Then run an HTTP server (e.g. Nginx, Caddy) to serve the files.
+The GitHub releases include two packages:
 
+* Web frontend
+* Android APK
+
+The web frontend can be self-hosted by running an HTTP server (e.g. Nginx, Caddy) to serve the files.
 
 ## Build
 
@@ -42,6 +46,12 @@ npm run build
 ```
 
 The packed files can then be found in `build` directory.
+
+To build Android APK, install Android SDK and run:
+
+```
+npm run build:android
+```
 
 ## License
 
