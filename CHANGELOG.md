@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/DCsunset/task.json-web/compare/v1.2.1...v1.3.0) (2021-04-12)
+
+
+### Features
+
+* add android build ([bb75f88](https://github.com/DCsunset/task.json-web/commit/bb75f882fe1757496529957405e33bd225394072))
+* add splash and icon ([1bc6ef7](https://github.com/DCsunset/task.json-web/commit/1bc6ef79b3b8f67f8e4d089af0220282ca57c3aa))
+
+
+### Bug Fixes
+
+* **android:** fix stretched splash ([94d0ec8](https://github.com/DCsunset/task.json-web/commit/94d0ec8a5497bc08c58ef9d848341514be6f5db8))
+* fix display on small devices ([ac61b57](https://github.com/DCsunset/task.json-web/commit/ac61b5710894680210aad038fbdff88d9098b444))
+* fix padding on small devices ([2290a50](https://github.com/DCsunset/task.json-web/commit/2290a502f03ee3c7a66dfb52d261b4bd5b46ec6f))
+
 ### [1.2.1](https://github.com/DCsunset/task.json-web/compare/v1.2.0...v1.2.1) (2021-03-30)
 
 ## [1.2.0](https://github.com/DCsunset/task.json-web/compare/v1.1.0...v1.2.0) (2021-03-30)
