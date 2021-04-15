@@ -31,7 +31,7 @@ jobs:
 
       - name: Build task.json-web
         run: |
-          npm ci
+          npm ci --no-optional
           npm run build
 
       - name: Create archive 
