@@ -15,6 +15,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { rootActions, RootState } from "../store";
 import { useState } from "react";
 import ConfirmationDialog from "./ConfirmationDialog";
+import urlRegex from "url-regex-safe";
+import normalizeUrl from "normalize-url";
 
 interface Props {
 	onAdd: () => void;
@@ -216,6 +218,41 @@ const Actions = (props: ActionsProps) => {
 	);
 };
 
+
+interface TaskTextProps {
+	text: string;
+	className: string;
+};
+
+// Linkify urls
+function TaskText(props: TaskTextProps) {
+	const regex = urlRegex();
+	const text = props.text;
+
+	let match: RegExpExecArray | null;
+	let lastIndex = 0;
+	let result = <></>;
+	while ((match = regex.exec(text)) !== null) {
+		const str = text.substring(lastIndex, match.index);
+		const url = (
+			<a
+				className={props.className}
+				target="_blank"
+				rel="noreferrer"
+				href={normalizeUrl(match[0])}
+				style={{ color: "inherit" }}
+			>
+				{match[0]}
+			</a>
+		);
+		result = <>{result}{str}{url}</>;
+		lastIndex = match.index + match[0].length;
+	}
+	result = <span className={props.className}>{result}{text.substring(lastIndex)}</span>;
+
+	return result;
+}
+
 function TaskList(props: Props) {
 	const [confirmationText, setConfirmationText] = useState("");
 	const [confirmationDialog, setConfirmationDialog] = useState(false);
@@ -375,7 +412,7 @@ function TaskList(props: Props) {
 							filterType: "textField",
 							sort: false,
 							customBodyRenderLite: index => (
-								<span className={colorTask(tasks[index])}>{tasks[index].text}</span>
+								<TaskText className={colorTask(tasks[index])} text={tasks[index].text} />
 							)
 						}
 					},
