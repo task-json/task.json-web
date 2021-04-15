@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.1](https://github.com/DCsunset/task.json-web/compare/v1.4.0...v1.4.1) (2021-04-15)
+
+
+### Bug Fixes
+
+* move cordova-res to optional dependencies ([acec768](https://github.com/DCsunset/task.json-web/commit/acec7684873e0fea68f3b2cdd91167b757df9bde))
+
 ## [1.4.0](https://github.com/DCsunset/task.json-web/compare/v1.3.0...v1.4.0) (2021-04-15)
 
 
