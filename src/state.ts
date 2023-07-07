@@ -1,9 +1,11 @@
 import { signal } from "@preact/signals";
+import { createContext } from "preact";
 import { Task } from "task.json";
+import { AlertColor } from "@mui/material/Alert";
 
 export type Notification = {
 	id?: string;
-	severity: Severity;
+	color: AlertColor;
 	text: string;
 };
 
@@ -31,4 +33,6 @@ export function createState() {
 
   return { taskJson, notifications, settings };
 }
+
+export const StateContext = createContext<ReturnType<typeof createState>>(undefined);
 

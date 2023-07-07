@@ -1,14 +1,12 @@
-import { createContext, render } from 'preact';
-import { createState } from "./state";
+import { render } from 'preact';
+import { StateContext, createState } from "./state";
 import App from "./App";
+import "@fontsource/roboto";
 import './style.css';
 
-const state = createState();
-const AppState = createContext(state);
-
 render(
-  <AppState.Provider value={state}>
+  <StateContext.Provider value={createState()}>
     <App />,
-  </AppState.Provider>,
+  </StateContext.Provider>,
   document.getElementById('app')
 );
