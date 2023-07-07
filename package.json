@@ -8,7 +8,9 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"preact": "^10.13.1"
+		"@preact/signals": "^1.1.5",
+		"preact": "^10.13.1",
+		"task.json": "^3.2.1"
 	},
 	"devDependencies": {
 		"@preact/preset-vite": "^2.5.0",
