@@ -3,6 +3,7 @@ import { StateContext, createState } from "./state";
 import App from "./App";
 import "@fontsource/roboto";
 import './style.css';
+import "virtual:uno.css";
 
 render(
   <StateContext.Provider value={createState()}>
