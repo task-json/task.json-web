@@ -1,11 +1,10 @@
 import { useContext } from "preact/hooks";
-import { StateContext } from "./state";
+import { state } from "./store/state";
 import { useComputed } from "@preact/signals";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Layout from "./components/Layout";
 
 export default function App() {
-  const state = useContext(StateContext);
   const theme = useComputed(() => {
     const dark = state.settings.value.dark;
     return createTheme({
@@ -14,7 +13,7 @@ export default function App() {
       }
     });
   });
-  
+
 	return (
     <ThemeProvider theme={theme.value}>
       <CssBaseline />

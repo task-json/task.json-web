@@ -1,5 +1,5 @@
 import { useContext } from "preact/hooks";
-import { StateContext } from "../state";
+import { state } from "../store/state";
 import { AppBar, Box, Toolbar, Typography, IconButton } from "@mui/material";
 import { blue } from "@mui/material/colors";
 import Icon from '@mdi/react';
@@ -13,7 +13,6 @@ interface Props {
 };
 
 export default function Layout(props: Props) {
-  const state = useContext(StateContext);
   const dark = useComputed(() => state.settings.value.dark);
 
   const settingsDialog = signal(false);

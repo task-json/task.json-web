@@ -19,8 +19,7 @@ import {
 import FileSaver from "file-saver";
 import { serializeTaskJson } from "task.json";
 import ConfirmationDialog from "./ConfirmationDialog";
-import { useContext } from "preact/hooks";
-import { StateContext } from "../state";
+import { state } from "../store/state";
 import { useComputed, useSignal, batch, Signal } from "@preact/signals";
 import Icon from '@mdi/react';
 import { mdiCloudDownload, mdiCloudUpload, mdiDelete, mdiImport, mdiExport, mdiSync } from "@mdi/js";
@@ -31,7 +30,6 @@ interface Props {
 
 function SettingsDialog(props: Props) {
   const isSmallDevice = useMediaQuery((theme: Theme) => theme.breakpoints.down("xs"));
-  const state = useContext(StateContext);
   const settings = useComputed(() => state.settings.value);
 
 	// Local states

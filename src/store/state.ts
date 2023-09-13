@@ -1,5 +1,4 @@
 import { signal } from "@preact/signals";
-import { createContext } from "preact";
 import { Task } from "task.json";
 import { AlertColor } from "@mui/material/Alert";
 
@@ -23,16 +22,12 @@ export type Settings = {
 };
 
 // global app state
-export function createState() {
-  const taskJson = signal<Task[]>([]);
-  const notifications = signal<Notification[]>([]);
-	const settings = signal<Settings>({
+export const state = {
+  taskJson: signal<Task[]>([]),
+  notifications: signal<Notification[]>([]),
+	settings: signal<Settings>({
 		maxPriorities: 3,
 		dark: false
-	});
-
-  return { taskJson, notifications, settings };
-}
-
-export const StateContext = createContext<ReturnType<typeof createState>>(undefined);
+	})
+};
 
