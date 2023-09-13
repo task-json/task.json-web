@@ -9,24 +9,35 @@ import {
 import { Signal } from "@preact/signals";
 
 interface Props {
-  state: Signal<{ open: boolean, text: string}>;
+  open: Signal<boolean>,
+  text: Signal<string>,
+  onConfirm: () => {};
 }
 
-function ConfirmationDialog({ state }: Props) {
+function ConfirmationDialog(props: Props) {
+  const close = () => {
+    props.open.value = false;
+  };
+
+  const confirm = () => {
+    close();
+    props.onConfirm();
+  };
+
 	return (
 		<Dialog
-			open={state.value.open}
-			onClose={() => state.value = { ...state.value, open: false }}
+			open={props.open.value}
+			onClose={close}
 		>
 			<DialogTitle>Confirm</DialogTitle>
 			<DialogContent>
-				<DialogContentText>{props.text}</DialogContentText>
+				<DialogContentText>{props.text.value}</DialogContentText>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={props.onCancel}>
+				<Button onClick={close}>
 					Cancel
 				</Button>
-				<Button color="error" onClick={props.onConfirm}>
+				<Button color="error" onClick={confirm}>
 					Yes
 				</Button>
 			</DialogActions>

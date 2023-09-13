@@ -5,6 +5,7 @@ import { blue } from "@mui/material/colors";
 import Icon from '@mdi/react';
 import { mdiStickerCheckOutline, mdiBrightness4, mdiBrightness7, mdiCog } from '@mdi/js';
 import { signal, useComputed } from "@preact/signals";
+import SettingsDialog from "./SettingsDialog";
 
 
 interface Props {
@@ -16,22 +17,22 @@ export default function Layout(props: Props) {
   const dark = useComputed(() => state.settings.value.dark);
 
   const settingsDialog = signal(false);
-  
-	const toggleTheme = () => {
-		state.settings.value = {
+
+  const toggleTheme = () => {
+    state.settings.value = {
       ...state.settings.value,
-			dark: !dark.value
-		};
-	};
+      dark: !dark.value
+    };
+  };
 
   return (
     <>
       <AppBar style={{ backgroundColor: blue[700] }} position="sticky">
         <Toolbar>
           <Icon path={mdiStickerCheckOutline} size={1.5} />
-					<Typography variant="h5" noWrap flexGrow={1} ml={2}>
-						Task.json Web
-					</Typography>
+          <Typography variant="h5" noWrap flexGrow={1} ml={2}>
+            Task.json Web
+          </Typography>
 
 					<IconButton
 						color="inherit"
@@ -50,9 +51,10 @@ export default function Layout(props: Props) {
 					>
             <Icon path={mdiCog} size={1.5} />
 					</IconButton>
-            
         </Toolbar>
       </AppBar>
+
+      <SettingsDialog open={settingsDialog} />
 
       <Box my={3}>
 				{props.children}

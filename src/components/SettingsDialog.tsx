@@ -1,4 +1,5 @@
 import {
+  Box,
 	Button,
 	IconButton,
 	Dialog,
@@ -10,64 +11,26 @@ import {
 	List,
 	ListItem,
 	ListItemText,
-	makeStyles,
 	TextField,
 	Typography,
-	useMediaQuery
+	useMediaQuery,
+  Theme
 } from "@mui/material";
 import FileSaver from "file-saver";
-import { RootState, rootActions, asyncActions } from "../store";
 import { serializeTaskJson } from "task.json";
-import { redBgStyle, redStyle } from "../utils/styles";
-import {
-	CloudUpload as CloudUploadIcon,
-	CloudDownload as CloudDownloadIcon,
-	Sync as SyncIcon,
-	Import as ImportIcon,
-	Export as ExportIcon,
-	Delete as DeleteIcon
-} from "mdi-material-ui";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { useContext } from "preact/hooks";
 import { StateContext } from "../state";
 import { useComputed, useSignal, batch, Signal } from "@preact/signals";
+import Icon from '@mdi/react';
+import { mdiCloudDownload, mdiCloudUpload, mdiDelete, mdiImport, mdiExport, mdiSync } from "@mdi/js";
 
 interface Props {
   open: Signal<boolean>
 }
 
-const useStyles = makeStyles(theme => ({
-	number: {
-		maxWidth: "45px"
-	},
-	password: {
-		maxWidth: "200px",
-		marginRight: theme.spacing(1)
-	},
-	dataButton: {
-		marginLeft: theme.spacing(1)
-	},
-	title: {
-		paddingBottom: 0
-	},
-	subtitle: {
-		marginBottom: theme.spacing(0.5)
-	},
-	divider: {
-		marginLeft: theme.spacing(2),
-		marginRight: theme.spacing(2),
-		marginTop: theme.spacing(2)
-	},
-	smallPadding: {
-		paddingLeft: theme.spacing(1),
-		paddingRight: theme.spacing(1)
-	},
-	red: redStyle(theme),
-	redBg: redBgStyle(theme)
-}));
-
 function SettingsDialog(props: Props) {
-  const isSmallDevice = useMediaQuery(theme.breakpoints.down("xs"));
+  const isSmallDevice = useMediaQuery((theme: Theme) => theme.breakpoints.down("xs"));
   const state = useContext(StateContext);
   const settings = useComputed(() => state.settings.value);
 
@@ -75,12 +38,11 @@ function SettingsDialog(props: Props) {
 	const maxPriorities = useSignal(settings.value.maxPriorities.toString());
 	const errorPriorities = useSignal(false);
 	const server = useSignal(settings.value.server ?? "");
+  const serverExists = useComputed(() => server.value.length > 0);
 	const password = useSignal("");
-	const oldToken = useSignal(settings.value.token ?? "");
-	const confirmationDialog = useSignal({
-    open: false,
-    text: ""
-  });
+	const token = useSignal(settings.value.token ?? "");
+	const confirmDialog = useSignal(false);
+  const confirmText = useSignal("");
 
   // reset local states
 	const reset = () => {
@@ -90,26 +52,31 @@ function SettingsDialog(props: Props) {
       server.value = settings.value.server ?? "";
       errorPriorities.value = false;
     })
-	};
+  };
 
-	const save = () => {
-		if (!errorPriorities.value) {
+  const close = () => {
+    props.open.value = false;
+    reset();
+  };
+
+  const save = () => {
+    if (!errorPriorities.value) {
       // TODO: update token
       state.settings.value = {
         ...settings.value,
-				maxPriorities: parseInt(maxPriorities.value),
-				server: server.value.length ? server.value : undefined
+        maxPriorities: parseInt(maxPriorities.value),
+        server: serverExists.value ? server.value : undefined
       };
 
-			props.open.value = false;
-		}
-	};
+      props.open.value = false;
+    }
+  };
 
-	const importData = (files: FileList | null) => {
-		if (!files?.length)
-			return;
-		
-		const reader = new FileReader();
+  const importData = (files: FileList | null) => {
+    if (!files?.length)
+      return;
+
+    const reader = new FileReader();
 		reader.onload = () => {
 			const taskJson = JSON.parse(reader.result as string);
       state.taskJson.value = taskJson;
@@ -134,10 +101,6 @@ function SettingsDialog(props: Props) {
 
 	const clearData = () => {
     batch(() => {
-      confirmationDialog.value = {
-        open: false,
-        text: ""
-      };
       state.taskJson.value = [];
       state.notifications.value = [
         ...state.notifications.value,
@@ -149,33 +112,34 @@ function SettingsDialog(props: Props) {
 			];
     });
 	};
-  
-	const handleClearData = () => {
-    confirmationDialog.value = {
-      open: true,
-      text: "Warning: This will clear all the data in the local storage. Are you sure to clear?"
-    };
+
+	const clearAction = () => {
+    batch(() => {
+      confirmDialog.value = true;
+      confirmText.value = "Warning: This will clear all the data in the local storage. Are you sure to clear?";
+    });
 	};
 
+  // TODO: add actions
 	const login = () => {
-		dispatch(asyncActions.login({
-			server,
-			password
-		}));
+		// dispatch(asyncActions.login({
+		// 	server,
+		// 	password
+		// }));
 	}
 	const logout = () => {
-		dispatch(rootActions.updateSettings({
-			token: null
-		}));
+		// dispatch(rootActions.updateSettings({
+		// 	token: null
+		// }));
 	};
 	const sync = () => {
-		dispatch(asyncActions.syncTasks());
+		// dispatch(asyncActions.syncTasks());
 	}
 	const upload = () => {
-		dispatch(asyncActions.uploadTasks());
+		// dispatch(asyncActions.uploadTasks());
 	}
 	const download = () => {
-		dispatch(asyncActions.downloadTasks());
+		// dispatch(asyncActions.downloadTasks());
 	}
 
 	return (
@@ -185,25 +149,24 @@ function SettingsDialog(props: Props) {
 			disableBackdropClick
 			fullWidth
 		>
-			<DialogTitle sx={{pb: 0}}>Settings</DialogTitle>
-			<DialogContent className={isSmallDevice ? classes.smallPadding : ""}>
+			<DialogTitle sx={{ pb: 0 }}>Settings</DialogTitle>
+			<DialogContent sx={{ px: isSmallDevice ? 1 : 0  }}>
 				<ConfirmationDialog
-					open={confirmationDialog}
-					text={confirmationText}
-					onCancel={() => confirmationDialog.value = false}
+          open={confirmDialog}
+          text={confirmText}
 					onConfirm={clearData}
 				/>
 
 				<List>
-					<div className={classes.divider}>
-						<Typography color="textSecondary" className={classes.subtitle}>
+					<Box sx={{ mx:2, mt: 2 }}>
+						<Typography color="textSecondary" sx={{ mb: 0.5 }}>
 							General
 						</Typography>
 						<Divider />
-					</div>
+					</Box>
 
 					<ListItem>
-						<Grid container justify="space-between" alignItems="center">
+						<Grid container justifyContent="space-between" alignItems="center">
 							<Grid item>
 								<ListItemText secondary={
 									<span>
@@ -216,19 +179,21 @@ function SettingsDialog(props: Props) {
 							</Grid>
 							<Grid item>
 								<TextField
-									className={classes.number}
-									error={errorPriorities}
+                  variant="standard"
 									type="number"
-									value={maxPriorities}
+                  sx={{ maxWidth: "45px" }}
+									error={errorPriorities.value}
+									value={maxPriorities.value}
 									onChange={event => {
 										const value = event.target.value;
-										if (value.length === 0)
-											setErrorPriorities(true);
+										if (value.length === 0) {
+                      errorPriorities.value = true;
+                    }
 										else {
 											const i = parseInt(value);
-											setErrorPriorities(i <= 0 || i > 26);
+                      errorPriorities.value = i <= 0 || i > 26;
 										}
-										setMaxPriorities(value);
+                    maxPriorities.value = value;
 									}}
 								/>
 							</Grid>
@@ -236,7 +201,7 @@ function SettingsDialog(props: Props) {
 					</ListItem>
 
 					<ListItem>
-						<Grid container justify="space-between" alignItems="center">
+						<Grid container justifyContent="space-between" alignItems="center">
 							<Grid item>
 								<ListItemText secondary="task.json">
 									JSON data
@@ -245,11 +210,11 @@ function SettingsDialog(props: Props) {
 							<Grid item>
 								<IconButton
 									color="secondary"
+                  sx={{ ml: 1 }}
 									onClick={exportData}
-									className={classes.dataButton}
 									title="Export"
 								>
-									<ExportIcon />
+                  <Icon path={mdiExport} size={1} />
 								</IconButton>
 								<input
 									id="import-data-input"
@@ -260,33 +225,37 @@ function SettingsDialog(props: Props) {
 								<label htmlFor="import-data-input">
 									<IconButton
 										color="primary"
-										className={classes.dataButton}
+                    sx={{ ml: 1 }}
 										component="span"
 										title="Import"
 									>
-										<ImportIcon />
+                    <Icon path={mdiImport} size={1} />
 									</IconButton>
 								</label>
 								<IconButton
-									onClick={handleClearData}
-									className={`${classes.dataButton} ${classes.red}`}
+                  color="error"
+                  sx={{ ml: 1 }}
 									title="Clear"
+									onClick={clearAction}
 								>
-									<DeleteIcon />
+                  <Icon path={mdiDelete} size={1} />
 								</IconButton>
 							</Grid>
 						</Grid>
 					</ListItem>
 
-					<div className={classes.divider}>
-						<Typography color="textSecondary" className={classes.subtitle}>
+					<Box sx={{ mx:2, mt: 2 }}>
+						<Typography color="textSecondary" sx={{ mb: 0.5 }}>
 							Server
 						</Typography>
 						<Divider />
-					</div>
+					</Box>
 
 					<ListItem>
-						<Grid container justify="space-between" alignItems="center">
+						<Grid container sx={{
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
 							<Grid item>
 								<ListItemText secondary="task.json-server">
 									Server
@@ -294,15 +263,20 @@ function SettingsDialog(props: Props) {
 							</Grid>
 							<Grid item>
 								<TextField
-									value={server}
-									onChange={event => setServer(event.target.value)}
+                  variant="standard"
+                  label="Server URL"
+									value={server.value}
+									onChange={event => server.value = event.target.value}
 								/>
 							</Grid>
 						</Grid>
 					</ListItem>
 
 					<ListItem>
-						<Grid container justify="space-between" alignItems="center">
+						<Grid container sx={{
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
 							<Grid item>
 								<ListItemText secondary={settings.token ? "already logged in" : "not logged in"}>
 									Session
@@ -315,16 +289,17 @@ function SettingsDialog(props: Props) {
 								{!settings.token && (
 									<>
 										<TextField
+                      variant="standard"
 											type="password"
+                      sx={{ maxWidth: "200px", ml: 1 }}
 											label="password"
-											value={password}
-											disabled={server.length === 0}
-											onChange={event => setPassword(event.target.value)}
-											className={classes.password}
+											value={password.value}
+											disabled={!serverExists.value}
+											onChange={event => password.value = event.target.value}
 										/>
 										<Button
 											size="small"
-											disabled={server.length === 0 || password.length === 0}
+											disabled={!serverExists.value || password.value.length === 0}
 											onClick={login}
 											color="secondary"
 										>
@@ -335,7 +310,7 @@ function SettingsDialog(props: Props) {
 								{Boolean(settings.token) &&
 									<Button
 										size="small"
-										className={classes.red}
+                    color="error"
 										onClick={logout}
 									>
 										Log out
@@ -346,7 +321,7 @@ function SettingsDialog(props: Props) {
 					</ListItem>
 
 					<ListItem>
-						<Grid container justify="space-between" alignItems="center">
+						<Grid container justifyContent="space-between" alignItems="center">
 							<Grid item>
 								<ListItemText>
 									Sync
@@ -355,30 +330,30 @@ function SettingsDialog(props: Props) {
 							<Grid item>
 								<IconButton
 									color="secondary"
-									className={classes.dataButton}
+                  sx={{ ml: 1 }}
 									onClick={sync}
 									disabled={!settings.token}
 									title="Sync"
 								>
-									<SyncIcon />
+                  <Icon path={mdiSync} size={1} />
 								</IconButton>
 								<IconButton
 									color="primary"
-									className={classes.dataButton}
+                  sx={{ ml: 1 }}
 									onClick={upload}
 									disabled={!settings.token}
 									title="Upload"
 								>
-									<CloudUploadIcon />
+                  <Icon path={mdiCloudUpload} size={1} />
 								</IconButton>
 								<IconButton
-									color="primary"
-									className={`${classes.dataButton} ${classes.red}`}
+                  color="error"
+                  sx={{ ml: 1 }}
 									onClick={download}
 									disabled={!settings.token}
 									title="Download"
 								>
-									<CloudDownloadIcon />
+                  <Icon path={mdiCloudDownload} size={1} />
 								</IconButton>
 							</Grid>
 						</Grid>
@@ -386,11 +361,8 @@ function SettingsDialog(props: Props) {
 				</List>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={() => {
-					props.onClose();
-					reset();
-				}}>Cancel</Button>
-				<Button className={classes.red} onClick={reset}>Reset</Button>
+				<Button onClick={close}>Cancel</Button>
+				<Button color="error" onClick={reset}>Reset</Button>
 				<Button color="primary" onClick={save}>Save</Button>
 			</DialogActions>
 		</Dialog>
