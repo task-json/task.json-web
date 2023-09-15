@@ -17,13 +17,13 @@
 		"@preact/signals": "^1.1.5",
 		"file-saver": "^2.0.5",
 		"preact": "^10.13.1",
-		"task.json": "^3.2.1"
+		"task.json": "^3.2.1",
+		"task.json-client": "^2.0.2"
 	},
 	"devDependencies": {
 		"@preact/preset-vite": "^2.5.0",
 		"@types/file-saver": "^2.0.5",
 		"typescript": "^5.1.6",
-		"unocss": "^0.53.4",
 		"vite": "^4.3.2"
 	}
 }
