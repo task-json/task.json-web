@@ -1,6 +1,7 @@
 import { signal } from "@preact/signals";
 import { Task } from "task.json";
 import { AlertColor } from "@mui/material/Alert";
+import { Client } from "task.json-client";
 
 export type Notification = {
 	id?: string;
@@ -28,6 +29,8 @@ export const state = {
 	settings: signal<Settings>({
 		maxPriorities: 3,
 		dark: false
-	})
+	}),
+  // Client to connect to server
+  client: null as (Client | null),
 };
 

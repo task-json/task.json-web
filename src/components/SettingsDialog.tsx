@@ -23,6 +23,7 @@ import { state } from "../store/state";
 import { useComputed, useSignal, batch, Signal } from "@preact/signals";
 import Icon from '@mdi/react';
 import { mdiCloudDownload, mdiCloudUpload, mdiDelete, mdiImport, mdiExport, mdiSync } from "@mdi/js";
+import { login, logout, syncTasks, uploadTasks, downloadTasks } from "../store/actions";
 
 interface Props {
   open: Signal<boolean>
@@ -119,25 +120,8 @@ function SettingsDialog(props: Props) {
 	};
 
   // TODO: add actions
-	const login = () => {
-		// dispatch(asyncActions.login({
-		// 	server,
-		// 	password
-		// }));
-	}
-	const logout = () => {
-		// dispatch(rootActions.updateSettings({
-		// 	token: null
-		// }));
-	};
-	const sync = () => {
-		// dispatch(asyncActions.syncTasks());
-	}
-	const upload = () => {
-		// dispatch(asyncActions.uploadTasks());
-	}
-	const download = () => {
-		// dispatch(asyncActions.downloadTasks());
+	const loginAction = async () => {
+    await login(server.value, password.value);
 	}
 
 	return (
@@ -296,10 +280,10 @@ function SettingsDialog(props: Props) {
 											onChange={event => password.value = event.target.value}
 										/>
 										<Button
+											color="secondary"
 											size="small"
 											disabled={!serverExists.value || password.value.length === 0}
-											onClick={login}
-											color="secondary"
+											onClick={loginAction}
 										>
 											Log in
 										</Button>
@@ -329,7 +313,7 @@ function SettingsDialog(props: Props) {
 								<IconButton
 									color="secondary"
                   sx={{ ml: 1 }}
-									onClick={sync}
+									onClick={syncTasks}
 									disabled={!settings.token}
 									title="Sync"
 								>
@@ -338,7 +322,7 @@ function SettingsDialog(props: Props) {
 								<IconButton
 									color="primary"
                   sx={{ ml: 1 }}
-									onClick={upload}
+									onClick={uploadTasks}
 									disabled={!settings.token}
 									title="Upload"
 								>
@@ -347,7 +331,7 @@ function SettingsDialog(props: Props) {
 								<IconButton
                   color="error"
                   sx={{ ml: 1 }}
-									onClick={download}
+									onClick={downloadTasks}
 									disabled={!settings.token}
 									title="Download"
 								>
@@ -359,7 +343,7 @@ function SettingsDialog(props: Props) {
 				</List>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={close}>Cancel</Button>
+				<Button color="inherit" onClick={close}>Cancel</Button>
 				<Button color="error" onClick={reset}>Reset</Button>
 				<Button color="primary" onClick={save}>Save</Button>
 			</DialogActions>
