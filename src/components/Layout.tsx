@@ -1,4 +1,3 @@
-import { useContext } from "preact/hooks";
 import { state } from "../store/state";
 import { AppBar, Box, Toolbar, Typography, IconButton } from "@mui/material";
 import { blue } from "@mui/material/colors";
@@ -26,9 +25,10 @@ export default function Layout(props: Props) {
 
   return (
     <>
-      <AppBar style={{ backgroundColor: blue[700] }} position="sticky">
+      {/* Disable backgroundImage to avoid color change in dark theme */}
+      <AppBar sx={{ backgroundColor: blue[700], backgroundImage: "none" }} position="sticky">
         <Toolbar>
-          <Icon path={mdiStickerCheckOutline} size={1.5} />
+          <Icon path={mdiStickerCheckOutline} size={1.25} />
           <Typography variant="h5" noWrap flexGrow={1} ml={2}>
             Task.json Web
           </Typography>
@@ -39,8 +39,8 @@ export default function Layout(props: Props) {
 						onClick={toggleTheme}
 					>
 						{dark.value ?
-              <Icon path={mdiBrightness4} size={1.5} /> :
-              <Icon path={mdiBrightness7} size={1.5} />}
+              <Icon path={mdiBrightness4} size={1.25} /> :
+              <Icon path={mdiBrightness7} size={1.25} />}
 					</IconButton>
 
 					<IconButton
@@ -48,7 +48,7 @@ export default function Layout(props: Props) {
 						title="Settings"
 						onClick={() => settingsDialog.value = true}
 					>
-            <Icon path={mdiCog} size={1.5} />
+            <Icon path={mdiCog} size={1.25} />
 					</IconButton>
         </Toolbar>
       </AppBar>

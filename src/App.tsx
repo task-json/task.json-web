@@ -1,32 +1,87 @@
-import { useContext } from "preact/hooks";
+import { useComputed, useSignal } from "@preact/signals";
+import {
+  CssBaseline,
+  ThemeProvider,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  createTheme,
+  useMediaQuery,
+  Container,
+  Box,
+  SxProps
+} from "@mui/material";
+import { blue, green } from "@mui/material/colors";
+import { TaskStatus } from "task.json";
 import { state } from "./store/state";
-import { useComputed } from "@preact/signals";
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Layout from "./components/Layout";
+import Icon from "@mdi/react";
+import { mdiCheck, mdiClockOutline, mdiDelete } from "@mdi/js";
+
+const toggleButtonStyle: SxProps = {
+  px: 2.5,
+  "&:not(.Mui-selected)": {
+    opacity: 0.7
+  }
+};
 
 export default function App() {
   const theme = useComputed(() => {
     const dark = state.settings.value.dark;
     return createTheme({
       palette: {
-        mode: dark ? "dark" : "light"
-      }
+        mode: dark ? "dark" : "light",
+        primary: {
+          main: blue[500],
+          contrastText: "#fff"
+        },
+        secondary: {
+          main: green[500],
+          contrastText: "#fff"
+        }
+      },
     });
   });
+  const isSmallDevice = useMediaQuery(theme.value.breakpoints.down("xs"));
+  const taskStatus = useSignal<TaskStatus>("todo");
 
-	return (
+  return (
     <ThemeProvider theme={theme.value}>
       <CssBaseline />
       <Layout>
-        <h1>Vite + Preact</h1>
-        <div class="card">
-          <p>
-            Edit <code>src/app.jsx</code> and save to test HMR
-          </p>
-        </div>
-        <p class="read-the-docs">Click on the Vite and Preact logos to learn more</p>
+        <Container>
+          <Typography sx={{ mb: 2 }} variant="h5">
+            Tasks
+          </Typography>
+
+          <ToggleButtonGroup
+            value={taskStatus.value}
+            onChange={(_, value) => value && (taskStatus.value = value)}
+            exclusive
+            sx={{ mb: 2, flexWrap: "wrap" }}
+          >
+            <ToggleButton value="todo" sx={toggleButtonStyle} color="primary">
+              <Icon path={mdiClockOutline} size={1} />
+              <Box sx={{ ml: 0.5 }}>
+                {isSmallDevice || "todo"}
+              </Box>
+            </ToggleButton>
+            <ToggleButton value="done" sx={toggleButtonStyle} color="primary">
+              <Icon path={mdiCheck} size={1} />
+              <Box sx={{ ml: 0.5 }}>
+                {isSmallDevice || "done"}
+              </Box>
+            </ToggleButton>
+            <ToggleButton value="removed" sx={toggleButtonStyle} color="primary">
+              <Icon path={mdiDelete} size={1} />
+              <Box sx={{ ml: 0.5 }}>
+                {isSmallDevice || "removed"}
+              </Box>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Container>
       </Layout>
     </ThemeProvider>
-	);
+  );
 }
 
