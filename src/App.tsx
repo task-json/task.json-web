@@ -17,6 +17,7 @@ import { state } from "./store/state";
 import Layout from "./components/Layout";
 import Icon from "@mdi/react";
 import { mdiCheck, mdiClockOutline, mdiDelete } from "@mdi/js";
+import TaskList from "./components/TaskList";
 
 const toggleButtonStyle: SxProps = {
   px: 2.5,
@@ -79,6 +80,8 @@ export default function App() {
               </Box>
             </ToggleButton>
           </ToggleButtonGroup>
+
+          <TaskList />
         </Container>
       </Layout>
     </ThemeProvider>

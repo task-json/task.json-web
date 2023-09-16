@@ -55,7 +55,7 @@ export default function Layout(props: Props) {
 
       <SettingsDialog open={settingsDialog} />
 
-      <Box my={3}>
+      <Box sx={{ my: 3 }}>
 				{props.children}
       </Box>
     </>
