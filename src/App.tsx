@@ -18,6 +18,8 @@ import Layout from "./components/Layout";
 import Icon from "@mdi/react";
 import { mdiCheck, mdiClockOutline, mdiDelete } from "@mdi/js";
 import TaskList from "./components/TaskList";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
 const toggleButtonStyle: SxProps = {
   px: 2.5,
@@ -47,44 +49,46 @@ export default function App() {
   const taskStatus = useSignal<TaskStatus>("todo");
 
   return (
-    <ThemeProvider theme={theme.value}>
-      <CssBaseline />
-      <Layout>
-        <Container>
-          <Typography sx={{ mb: 2 }} variant="h5">
-            Tasks
-          </Typography>
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <ThemeProvider theme={theme.value}>
+        <CssBaseline />
+        <Layout>
+          <Container>
+            <Typography sx={{ mb: 2 }} variant="h5">
+              Tasks
+            </Typography>
 
-          <ToggleButtonGroup
-            value={taskStatus.value}
-            onChange={(_, value) => value && (taskStatus.value = value)}
-            exclusive
-            sx={{ mb: 2, flexWrap: "wrap" }}
-          >
-            <ToggleButton value="todo" sx={toggleButtonStyle} color="primary">
-              <Icon path={mdiClockOutline} size={1} />
-              <Box sx={{ ml: 0.5 }}>
-                {isSmallDevice || "todo"}
-              </Box>
-            </ToggleButton>
-            <ToggleButton value="done" sx={toggleButtonStyle} color="primary">
-              <Icon path={mdiCheck} size={1} />
-              <Box sx={{ ml: 0.5 }}>
-                {isSmallDevice || "done"}
-              </Box>
-            </ToggleButton>
-            <ToggleButton value="removed" sx={toggleButtonStyle} color="primary">
-              <Icon path={mdiDelete} size={1} />
-              <Box sx={{ ml: 0.5 }}>
-                {isSmallDevice || "removed"}
-              </Box>
-            </ToggleButton>
-          </ToggleButtonGroup>
+            <ToggleButtonGroup
+              value={taskStatus.value}
+              onChange={(_, value) => value && (taskStatus.value = value)}
+              exclusive
+              sx={{ mb: 2, flexWrap: "wrap" }}
+            >
+              <ToggleButton value="todo" sx={toggleButtonStyle} color="primary">
+                <Icon path={mdiClockOutline} size={1} />
+                <Box sx={{ ml: 0.5 }}>
+                  {isSmallDevice || "todo"}
+                </Box>
+              </ToggleButton>
+              <ToggleButton value="done" sx={toggleButtonStyle} color="primary">
+                <Icon path={mdiCheck} size={1} />
+                <Box sx={{ ml: 0.5 }}>
+                  {isSmallDevice || "done"}
+                </Box>
+              </ToggleButton>
+              <ToggleButton value="removed" sx={toggleButtonStyle} color="primary">
+                <Icon path={mdiDelete} size={1} />
+                <Box sx={{ ml: 0.5 }}>
+                  {isSmallDevice || "removed"}
+                </Box>
+              </ToggleButton>
+            </ToggleButtonGroup>
 
-          <TaskList />
-        </Container>
-      </Layout>
-    </ThemeProvider>
+            <TaskList />
+          </Container>
+        </Layout>
+      </ThemeProvider>
+    </LocalizationProvider>
   );
 }
 

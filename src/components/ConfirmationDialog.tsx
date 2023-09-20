@@ -11,7 +11,7 @@ import { Signal } from "@preact/signals";
 interface Props {
   open: Signal<boolean>,
   text: Signal<string>,
-  onConfirm: () => {};
+  onConfirm: () => any;
 }
 
 function ConfirmationDialog(props: Props) {

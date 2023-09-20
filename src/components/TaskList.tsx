@@ -1,8 +1,12 @@
+import Icon from "@mdi/react";
 import { state } from "../store/state";
-import { Box } from "@mui/material";
-import { useComputed } from "@preact/signals";
+import { Box, Card, IconButton, Toolbar } from "@mui/material";
+import { useComputed, useSignal } from "@preact/signals";
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
+import { mdiDelete, mdiPlus } from "@mdi/js";
+import TaskDialog from "./TaskDialog";
+import { Task } from "task.json";
 
 const defaultColDef: ColDef = {
   resizable: true,
@@ -36,36 +40,41 @@ const columnDefs: ColDef[] = [
 ]
 
 export default function TaskList() {
-  const data = [
-    { priority: "A", text: "Hello", projects: ["a", "b"] },
-    { priority: "B", text: "Hello 2", projects: ["a"] },
-    { priority: "C", text: "Hello 2" },
-    { priority: "C", text: "Hello 2" },
-    { priority: "C", text: "Hello 2" },
-    { priority: "C", text: "Hello 2" },
-    { priority: "C", text: "Hello 2" },
-    { priority: "C", text: "Hello 2" },
-  ];
-
   const agTheme = useComputed(() => (
     state.settings.value.dark
       ? "ag-theme-alpine-dark"
       : "ag-theme-alpine"
   ));
+  const taskDialog = useSignal(false);
+  const addTask = (task: Task) => {
+    state.taskJson.value = [...state.taskJson.value, task];
+  };
 
   return (
-    <Box className={agTheme.value}>
-      {/* use autoHeight with pagination for auto height based on page size */}
-      <AgGridReact
-        pagination={true}
-        paginationPageSize={5}
-        domLayout="autoHeight"
-        rowData={data}
-        columnDefs={columnDefs}
-        defaultColDef={defaultColDef}
-        animateRows={true}
-        rowSelection="multiple"
-      />
-    </Box>
+    <Card>
+      <Box sx={{
+        display: "flex",
+        flexDirection: "row-reverse",
+      }}>
+        <IconButton color="success" onClick={() => taskDialog.value = true}>
+          <Icon path={mdiPlus} size={1.4} />
+        </IconButton>
+      </Box>
+      <Box className={agTheme.value}>
+        {/* use autoHeight with pagination for auto height based on page size */}
+        <AgGridReact
+          pagination={true}
+          paginationPageSize={5}
+          domLayout="autoHeight"
+          rowData={state.taskJson.value}
+          columnDefs={columnDefs}
+          defaultColDef={defaultColDef}
+          animateRows={true}
+          rowSelection="multiple"
+        />
+      </Box>
+
+      <TaskDialog open={taskDialog} onConfirm={addTask} />
+    </Card>
   )
 }

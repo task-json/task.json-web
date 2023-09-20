@@ -1,5 +1,5 @@
-import { signal } from "@preact/signals";
-import { Task } from "task.json";
+import { computed, signal } from "@preact/signals";
+import { Task, TaskJson, TaskStatus } from "task.json";
 import { AlertColor } from "@mui/material/Alert";
 import { Client } from "task.json-client";
 
@@ -32,5 +32,29 @@ export const state = {
 	}),
   // Client to connect to server
   client: null as (Client | null),
+};
+
+function aggregateTasks(tasks: Task[], field: "projects" | "contexts") {
+  const values: Set<string> = new Set();
+
+  for (const task of tasks) {
+    if (task.status === "removed") {
+      continue;
+    }
+    task[field]?.forEach(value => {
+      values.add(value);
+    });
+  }
+  return [...values];
+}
+
+export const computedState = {
+  allProjects: computed(() => aggregateTasks(state.taskJson.value, "projects")),
+  allContexts: computed(() => aggregateTasks(state.taskJson.value, "contexts")),
+  allPriorities:  computed(() => (
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      .substring(0, state.settings.value.maxPriorities)
+      .split("")
+  ))
 };
 

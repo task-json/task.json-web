@@ -39,7 +39,6 @@ function SettingsDialog(props: Props) {
 	const server = useSignal(settings.value.server ?? "");
   const serverExists = useComputed(() => server.value.length > 0);
 	const password = useSignal("");
-	const token = useSignal(settings.value.token ?? "");
 	const confirmDialog = useSignal(false);
   const confirmText = useSignal("");
 
