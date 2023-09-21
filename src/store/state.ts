@@ -14,7 +14,6 @@ export const createNotification = (payload: Notification) => ({
 	id: new Date().toISOString()
 });
 
-
 export type Settings = {
 	maxPriorities: number;
 	dark: boolean;
@@ -26,6 +25,11 @@ export type Settings = {
 export const state = {
   taskJson: signal<Task[]>([]),
   notifications: signal<Notification[]>([]),
+  confirmation: {
+    open: signal(false),
+    text: signal(""),
+    onConfirm: () => {}
+  },
 	settings: signal<Settings>({
 		maxPriorities: 3,
 		dark: false

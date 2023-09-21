@@ -10,6 +10,7 @@ import { blue, green } from "@mui/material/colors";
 import { state } from "./store/state";
 import Layout from "./components/Layout";
 import TaskList from "./components/TaskList";
+import ConfirmationDialog from "./components/ConfirmationDialog";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
@@ -43,6 +44,8 @@ export default function App() {
 
             <TaskList />
           </Container>
+
+          <ConfirmationDialog />
         </Layout>
       </ThemeProvider>
     </LocalizationProvider>

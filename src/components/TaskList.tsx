@@ -91,6 +91,13 @@ export default function TaskList() {
       state.taskJson.value = state.taskJson.value.filter(t => !ids.has(t.id));
     });
   };
+  const eraseAction = () => {
+    state.confirmation.onConfirm = eraseSelected;
+    batch(() => {
+      state.confirmation.open.value = true;
+      state.confirmation.text.value = "Warning: This will permanently erase the tasks. Make sure they are not on the sync server. Confirm to erase?";
+    });
+  };
   const updateSelectedStatus = (status: TaskStatus) => {
     const ids = getSelectedIds();
     batch(() => {
@@ -154,7 +161,7 @@ export default function TaskList() {
                 ? undefined
                 : "none"
             }}
-            onClick={eraseSelected}
+            onClick={eraseAction}
           >
             <Icon path={mdiEraserVariant} size={1.25} />
           </IconButton>

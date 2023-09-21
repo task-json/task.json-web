@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import FileSaver from "file-saver";
 import { serializeTaskJson } from "task.json";
-import ConfirmationDialog from "./ConfirmationDialog";
 import { state } from "../store/state";
 import { useComputed, useSignal, batch, Signal } from "@preact/signals";
 import Icon from '@mdi/react';
@@ -39,8 +38,6 @@ function SettingsDialog(props: Props) {
 	const server = useSignal(settings.value.server ?? "");
   const serverExists = useComputed(() => server.value.length > 0);
 	const password = useSignal("");
-	const confirmDialog = useSignal(false);
-  const confirmText = useSignal("");
 
   // reset local states
 	const reset = () => {
@@ -112,9 +109,10 @@ function SettingsDialog(props: Props) {
 	};
 
 	const clearAction = () => {
+    state.confirmation.onConfirm = clearData;
     batch(() => {
-      confirmDialog.value = true;
-      confirmText.value = "Warning: This will clear all the data in the local storage. Are you sure to clear?";
+      state.confirmation.open.value = true;
+      state.confirmation.text.value = "Warning: This will clear all the data in the local storage. Are you sure to clear?";
     });
 	};
 
@@ -132,12 +130,6 @@ function SettingsDialog(props: Props) {
 		>
 			<DialogTitle sx={{ pb: 0 }}>Settings</DialogTitle>
 			<DialogContent sx={{ px: isSmallDevice ? 1 : 0  }}>
-				<ConfirmationDialog
-          open={confirmDialog}
-          text={confirmText}
-					onConfirm={clearData}
-				/>
-
 				<List>
 					<Box sx={{ mx:2, mt: 2 }}>
 						<Typography color="textSecondary" sx={{ mb: 0.5 }}>

@@ -1,3 +1,4 @@
+import { state } from "../store/state";
 import {
 	Button,
 	Dialog,
@@ -6,32 +7,25 @@ import {
 	DialogContentText,
 	DialogTitle,
 } from "@mui/material";
-import { Signal } from "@preact/signals";
 
-interface Props {
-  open: Signal<boolean>,
-  text: Signal<string>,
-  onConfirm: () => any;
-}
-
-function ConfirmationDialog(props: Props) {
+function ConfirmationDialog() {
   const close = () => {
-    props.open.value = false;
+    state.confirmation.open.value = false;
   };
 
   const confirm = () => {
     close();
-    props.onConfirm();
+    state.confirmation.onConfirm();
   };
 
 	return (
 		<Dialog
-			open={props.open.value}
+			open={state.confirmation.open.value}
 			onClose={close}
 		>
 			<DialogTitle>Confirm</DialogTitle>
 			<DialogContent>
-				<DialogContentText>{props.text.value}</DialogContentText>
+				<DialogContentText>{state.confirmation.text.value}</DialogContentText>
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={close}>
