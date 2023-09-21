@@ -12,7 +12,7 @@ import {
 import { batch, useComputed, useSignal } from "@preact/signals";
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import { mdiCheck, mdiClockOutline, mdiDelete, mdiPlus } from "@mdi/js";
+import { mdiCheck, mdiClockOutline, mdiDelete, mdiEraserVariant, mdiPlus, mdiRestore } from "@mdi/js";
 import TaskDialog from "./TaskDialog";
 import { Task, TaskStatus } from "task.json";
 import { useRef } from "preact/hooks";
@@ -67,6 +67,12 @@ export default function TaskList() {
   const gridRef = useRef<AgGridReact<Task>>();
   const taskDialog = useSignal(false);
   const selectedTasks = useSignal<Task[]>([]);
+  const getSelectedIds = () => {
+    return selectedTasks.value.reduce(
+      (acc, t) => acc.add(t.id),
+      new Set<string>()
+    );
+  };
 
   const currentTasks = useComputed(() => (
     state.taskJson.value.filter(t => t.status === taskStatus.value)
@@ -78,14 +84,22 @@ export default function TaskList() {
   const addTask = (task: Task) => {
     state.taskJson.value = [...state.taskJson.value, task];
   };
-  const deleteTasks = () => {
-    const deletedIds = selectedTasks.value.reduce(
-      (acc, t) => acc.add(t.id),
-      new Set<string>()
-    );
+  const eraseSelected = () => {
+    const ids = getSelectedIds();
     batch(() => {
       selectedTasks.value = [];
-      state.taskJson.value = state.taskJson.value.filter(t => !deletedIds.has(t.id));
+      state.taskJson.value = state.taskJson.value.filter(t => !ids.has(t.id));
+    });
+  };
+  const updateSelectedStatus = (status: TaskStatus) => {
+    const ids = getSelectedIds();
+    batch(() => {
+      selectedTasks.value = [];
+      state.taskJson.value = state.taskJson.value.map(t => (
+        ids.has(t.id)
+          ? { ...t, status }
+          : t
+      ));
     });
   };
 
@@ -124,7 +138,7 @@ export default function TaskList() {
           p: 0.5
         }}>
           <IconButton
-            color="success"
+            color="primary"
             size="small"
             title="Add"
             onClick={() => taskDialog.value = true}
@@ -134,11 +148,54 @@ export default function TaskList() {
           <IconButton
             color="error"
             size="small"
+            title="Erase"
+            sx={{
+              display: taskStatus.value === "removed" && selectedTasks.value.length > 0
+                ? undefined
+                : "none"
+            }}
+            onClick={eraseSelected}
+          >
+            <Icon path={mdiEraserVariant} size={1.25} />
+          </IconButton>
+          <IconButton
+            color="error"
+            size="small"
             title="Delete"
-            sx={{ display: selectedTasks.value.length > 0 ? undefined : "none" }}
-            onClick={deleteTasks}
+            sx={{
+              display: taskStatus.value !== "removed" && selectedTasks.value.length > 0
+                ? undefined
+                : "none"
+            }}
+            onClick={() => updateSelectedStatus("removed")}
           >
             <Icon path={mdiDelete} size={1.25} />
+          </IconButton>
+          <IconButton
+            color="success"
+            size="small"
+            title="Do"
+            sx={{
+              display: taskStatus.value === "todo" && selectedTasks.value.length > 0
+                ? undefined
+                : "none"
+            }}
+            onClick={() => updateSelectedStatus("done")}
+          >
+            <Icon path={mdiCheck} size={1.25} />
+          </IconButton>
+          <IconButton
+            color="success"
+            size="small"
+            title="Undo"
+            sx={{
+              display: taskStatus.value === "done" && selectedTasks.value.length > 0
+                ? undefined
+                : "none"
+            }}
+            onClick={() => updateSelectedStatus("todo")}
+          >
+            <Icon path={mdiRestore} size={1.25} />
           </IconButton>
         </Box>
 
