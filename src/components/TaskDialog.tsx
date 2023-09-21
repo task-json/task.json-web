@@ -1,5 +1,5 @@
-import { state, computedState } from "../store/state";
-import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, SxProps, TextField } from "@mui/material";
+import { computedState } from "../store/state";
+import { Autocomplete, Box, Button, Dialog, DialogActions, DialogTitle, FormControl, InputLabel, MenuItem, Select, SxProps, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { Signal, batch, useSignal } from "@preact/signals";
 import { Task } from "task.json";
@@ -40,6 +40,7 @@ export default function TaskDialog(props: Props) {
     props.onConfirm({
       id: uuidv4(),
       status: "todo",
+      priority: priority.value,
       text: text.value,
       projects: projects.value.length ? projects.value : undefined,
       contexts: contexts.value.length ? projects.value : undefined,

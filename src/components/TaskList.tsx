@@ -1,12 +1,20 @@
 import Icon from "@mdi/react";
 import { state } from "../store/state";
-import { Box, Card, IconButton, Toolbar } from "@mui/material";
+import {
+  useMediaQuery,
+  SxProps,
+  Box,
+  Card,
+  IconButton,
+  ToggleButton,
+  ToggleButtonGroup
+} from "@mui/material";
 import { batch, useComputed, useSignal } from "@preact/signals";
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import { mdiDelete, mdiPlus } from "@mdi/js";
+import { mdiCheck, mdiClockOutline, mdiDelete, mdiPlus } from "@mdi/js";
 import TaskDialog from "./TaskDialog";
-import { Task } from "task.json";
+import { Task, TaskStatus } from "task.json";
 import { useRef } from "preact/hooks";
 
 const defaultColDef: ColDef = {
@@ -38,7 +46,15 @@ const columnDefs: ColDef[] = [
   {
     field: "due"
   }
-]
+];
+
+const toggleButtonStyle: SxProps = {
+  px: 2.5,
+  "&:not(.Mui-selected)": {
+    opacity: 0.7
+  }
+};
+
 
 export default function TaskList() {
   const agTheme = useComputed(() => (
@@ -46,9 +62,15 @@ export default function TaskList() {
       ? "ag-theme-alpine-dark"
       : "ag-theme-alpine"
   ));
+  const isSmallDevice = useMediaQuery(theme => theme.breakpoints.down("xs"));
+  const taskStatus = useSignal<TaskStatus>("todo");
   const gridRef = useRef<AgGridReact<Task>>();
   const taskDialog = useSignal(false);
   const selectedTasks = useSignal<Task[]>([]);
+
+  const currentTasks = useComputed(() => (
+    state.taskJson.value.filter(t => t.status === taskStatus.value)
+  ));
 
   const onSelectionChanged = () => {
     selectedTasks.value = gridRef.current.api.getSelectedRows();
@@ -68,48 +90,76 @@ export default function TaskList() {
   };
 
   return (
-    <Card>
-      <Box sx={{
-        display: "flex",
-        flexDirection: "row-reverse",
-        p: 0.5
-      }}>
-        <IconButton
-          color="success"
-          size="small"
-          title="Add"
-          onClick={() => taskDialog.value = true}
-        >
-          <Icon path={mdiPlus} size={1.25} />
-        </IconButton>
-        <IconButton
-          color="error"
-          size="small"
-          title="Delete"
-          sx={{ display: selectedTasks.value.length > 0 ? undefined : "none" }}
-          onClick={deleteTasks}
-        >
-          <Icon path={mdiDelete} size={1.25} />
-        </IconButton>
-      </Box>
+    <>
+      <ToggleButtonGroup
+        value={taskStatus.value}
+        onChange={(_, value) => value && (taskStatus.value = value)}
+        exclusive
+        sx={{ mb: 2, flexWrap: "wrap" }}
+      >
+        <ToggleButton value="todo" sx={toggleButtonStyle} color="primary">
+          <Icon path={mdiClockOutline} size={1} />
+          <Box sx={{ ml: 0.5 }}>
+            {isSmallDevice || "todo"}
+          </Box>
+        </ToggleButton>
+        <ToggleButton value="done" sx={toggleButtonStyle} color="primary">
+          <Icon path={mdiCheck} size={1} />
+          <Box sx={{ ml: 0.5 }}>
+            {isSmallDevice || "done"}
+          </Box>
+        </ToggleButton>
+        <ToggleButton value="removed" sx={toggleButtonStyle} color="primary">
+          <Icon path={mdiDelete} size={1} />
+          <Box sx={{ ml: 0.5 }}>
+            {isSmallDevice || "removed"}
+          </Box>
+        </ToggleButton>
+      </ToggleButtonGroup>
 
-      <Box className={agTheme.value}>
-        {/* use autoHeight with pagination for auto height based on page size */}
-        <AgGridReact
-          ref={gridRef}
-          pagination={true}
-          paginationPageSize={5}
-          domLayout="autoHeight"
-          rowData={state.taskJson.value}
-          columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          animateRows={true}
-          rowSelection="multiple"
-          onSelectionChanged={onSelectionChanged}
-        />
-      </Box>
+      <Card>
+        <Box sx={{
+          display: "flex",
+          flexDirection: "row-reverse",
+          p: 0.5
+        }}>
+          <IconButton
+            color="success"
+            size="small"
+            title="Add"
+            onClick={() => taskDialog.value = true}
+          >
+            <Icon path={mdiPlus} size={1.25} />
+          </IconButton>
+          <IconButton
+            color="error"
+            size="small"
+            title="Delete"
+            sx={{ display: selectedTasks.value.length > 0 ? undefined : "none" }}
+            onClick={deleteTasks}
+          >
+            <Icon path={mdiDelete} size={1.25} />
+          </IconButton>
+        </Box>
 
-      <TaskDialog open={taskDialog} onConfirm={addTask} />
-    </Card>
-  )
+        <Box className={agTheme.value}>
+          {/* use autoHeight with pagination for auto height based on page size */}
+          <AgGridReact
+            ref={gridRef}
+            pagination={true}
+            paginationPageSize={5}
+            domLayout="autoHeight"
+            rowData={currentTasks.value}
+            columnDefs={columnDefs}
+            defaultColDef={defaultColDef}
+            animateRows={true}
+            rowSelection="multiple"
+            onSelectionChanged={onSelectionChanged}
+          />
+        </Box>
+
+        <TaskDialog open={taskDialog} onConfirm={addTask} />
+      </Card>
+    </>
+  );
 }
