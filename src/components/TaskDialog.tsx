@@ -44,6 +44,7 @@ export default function TaskDialog(props: Props) {
       text: text.value,
       projects: projects.value.length ? projects.value : undefined,
       contexts: contexts.value.length ? projects.value : undefined,
+      due: due ? due.value.toISO() : undefined,
       created: date,
       modified: date
     });

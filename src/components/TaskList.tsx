@@ -7,23 +7,52 @@ import {
   Card,
   IconButton,
   ToggleButton,
-  ToggleButtonGroup
+  ToggleButtonGroup,
+  Theme
 } from "@mui/material";
 import { batch, useComputed, useSignal } from "@preact/signals";
-import { ColDef } from "ag-grid-community";
+import { ColDef, RowClassParams } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { mdiCheck, mdiClockOutline, mdiDelete, mdiEraserVariant, mdiPlus, mdiRestore } from "@mdi/js";
 import TaskDialog from "./TaskDialog";
-import { Task, TaskStatus } from "task.json";
+import { Task, TaskStatus, taskUrgency } from "task.json";
 import { useRef } from "preact/hooks";
+import { CSSProperties } from "preact/compat";
+import { amber, cyan, red } from "@mui/material/colors";
+import { DateTime, DurationObjectUnits } from "luxon";
 
-const defaultColDef: ColDef = {
+function showDate(date: DateTime) {
+	type Unit = keyof DurationObjectUnits;
+	const units: Unit[] = ["years", "months", "days", "hours", "minutes", "seconds"];
+	const shortUnit = (unit: Unit) => {
+		let short = unit.charAt(0);
+		if (short === "m" && unit === "months")
+			short = "M";
+		return short;
+	};
+
+	const duration = date.diffNow(units);
+	for (const unit of units) {
+		const value = duration[unit];
+		if (value < 0)
+			return "x";
+		if (value > 0) {
+			if (unit === "seconds")
+				return "<1m";
+			return `${value}${shortUnit(unit)}`;
+		}
+	}
+
+	return "x";
+}
+
+const defaultColDef: ColDef<Task> = {
   resizable: true,
   sortable: true,
   filter: true,
 };
 
-const columnDefs: ColDef[] = [
+const columnDefs: ColDef<Task>[] = [
   {
     field: "priority",
     headerName: "P",
@@ -43,7 +72,8 @@ const columnDefs: ColDef[] = [
     headerName: "Ctx"
   },
   {
-    field: "due"
+    field: "due",
+    valueFormatter: params => params.data.due && showDate(DateTime.fromISO(params.data.due))
   }
 ];
 
@@ -54,14 +84,13 @@ const toggleButtonStyle: SxProps = {
   }
 };
 
-
 export default function TaskList() {
   const agTheme = useComputed(() => (
     state.settings.value.dark
       ? "ag-theme-alpine-dark"
       : "ag-theme-alpine"
   ));
-  const isSmallDevice = useMediaQuery(theme => theme.breakpoints.down("xs"));
+  const isSmallDevice = useMediaQuery((theme: Theme) => theme.breakpoints.down("xs"));
   const taskStatus = useSignal<TaskStatus>("todo");
   const gridRef = useRef<AgGridReact<Task>>();
   const taskDialog = useSignal(false);
@@ -108,6 +137,34 @@ export default function TaskList() {
       ));
     });
   };
+
+  // highlight urgent tasks
+  const getRowStyle = useComputed(() => {
+    const dark = state.settings.value.dark;
+    return (params: RowClassParams<Task>): CSSProperties => {
+      const task = params.data;
+      // Only color todo tasks
+      if (task.status !== "todo")
+      return undefined;
+
+      const urg = taskUrgency(task);
+      const color = (
+        urg >= 1000
+          ? red[500]
+          : urg >= 100
+            ? (dark ? amber[600] : amber[800])
+            : urg >= 1
+              ? (dark ? cyan[400] : cyan[600])
+              : undefined
+      );
+
+      return color && {
+        fontWeight: 500,
+        color
+      };
+    };
+  });
+
 
   return (
     <>
@@ -218,6 +275,7 @@ export default function TaskList() {
             animateRows={true}
             rowSelection="multiple"
             onSelectionChanged={onSelectionChanged}
+            getRowStyle={getRowStyle.value}
           />
         </Box>
 
