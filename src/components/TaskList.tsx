@@ -21,7 +21,6 @@ const defaultColDef: ColDef = {
   resizable: true,
   sortable: true,
   filter: true,
-  // checkboxSelection: true,
 };
 
 const columnDefs: ColDef[] = [

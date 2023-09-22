@@ -1,4 +1,4 @@
-import { computed, signal } from "@preact/signals";
+import { computed, effect, signal } from "@preact/signals";
 import { Task, TaskJson, TaskStatus } from "task.json";
 import { AlertColor } from "@mui/material/Alert";
 import { Client } from "task.json-client";
@@ -18,22 +18,35 @@ export type Settings = {
 	maxPriorities: number;
 	dark: boolean;
 	server?: string;
-	token?: string;
 };
+
+
+function loadState(key: string) {
+  try {
+    const data = localStorage.getItem(key);
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+  }
+  catch (err: any) {
+    console.error(err);
+  }
+  return undefined;
+}
 
 // global app state
 export const state = {
-  taskJson: signal<Task[]>([]),
+  taskJson: signal<Task[]>(loadState("taskJson") ?? []),
+	settings: signal<Settings>(loadState("settings") ?? {
+		maxPriorities: 3,
+		dark: false
+	}),
   notifications: signal<Notification[]>([]),
   confirmation: {
     open: signal(false),
     text: signal(""),
     onConfirm: () => {}
   },
-	settings: signal<Settings>({
-		maxPriorities: 3,
-		dark: false
-	}),
   // Client to connect to server
   client: null as (Client | null),
 };
@@ -61,4 +74,10 @@ export const computedState = {
       .split("")
   ))
 };
+
+// Persist state on change
+effect(() => {
+  localStorage.setItem("taskJson", JSON.stringify(state.taskJson.value));
+  localStorage.setItem("settings", JSON.stringify(state.settings.value));
+});
 
