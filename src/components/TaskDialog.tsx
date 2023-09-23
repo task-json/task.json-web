@@ -1,10 +1,11 @@
 import { computedState } from "../store/state";
 import { Autocomplete, Box, Button, Dialog, DialogActions, DialogTitle, FormControl, InputLabel, MenuItem, Select, SxProps, TextField } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
-import { Signal, batch, useSignal } from "@preact/signals";
+import { DateTimePicker } from "@mui/x-date-pickers";
+import { Signal, batch, effect, useSignal } from "@preact/signals";
 import { Task } from "task.json";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
+import { useRef } from "preact/hooks";
 
 interface Props {
   open: Signal<boolean>,
@@ -22,6 +23,16 @@ export default function TaskDialog(props: Props) {
   const projects = useSignal<string[]>([]);
   const contexts = useSignal<string[]>([]);
 
+  const textError = useSignal(false);
+  const dueError = useSignal(false);
+
+  const validate = () => {
+    if (text.value.length === 0) {
+      textError.value = true;
+      return false;
+    }
+    return due.value === null || !dueError.value;
+  };
   const reset = () => {
     batch(() => {
       text.value = "";
@@ -29,6 +40,7 @@ export default function TaskDialog(props: Props) {
       due.value = null;
       projects.value = [];
       contexts.value = [];
+      textError.value = false;
     })
   };
   const close = () => {
@@ -36,6 +48,9 @@ export default function TaskDialog(props: Props) {
     reset();
   };
   const confirm = () => {
+    if (!validate()) {
+      return;
+    }
     const date = new Date().toISOString();
     props.onConfirm({
       id: uuidv4(),
@@ -44,7 +59,7 @@ export default function TaskDialog(props: Props) {
       text: text.value,
       projects: projects.value.length ? projects.value : undefined,
       contexts: contexts.value.length ? projects.value : undefined,
-      due: due ? due.value.toISO() : undefined,
+      due: due.value ? due.value.toISO() : undefined,
       created: date,
       modified: date
     });
@@ -60,11 +75,13 @@ export default function TaskDialog(props: Props) {
       <Box sx={{ display: "flex", flexDirection: "column", px: 3 }}>
         <TextField
           label="Text"
+          autoFocus
           sx={inputStyle}
           required
+          error={textError.value}
           value={text.value}
           onChange={(event: any) => text.value = event.target.value}
-          autoFocus
+          onBlur={() => textError.value = text.value.length === 0}
         />
         <FormControl sx={inputStyle}>
           <InputLabel id="priority-select">Priority</InputLabel>
@@ -84,12 +101,15 @@ export default function TaskDialog(props: Props) {
             ))}
           </Select>
         </FormControl>
-        <DatePicker
+        <DateTimePicker
           label="Due"
-          format="yyyy-MM-dd"
+          format="yyyy-MM-dd hh:mm:ss"
+          ampm={false}
           sx={inputStyle}
           value={due.value}
           onChange={value => due.value = value}
+          onError={err => dueError.value = err !== null}
+          onAccept={() => dueError.value = false}
         />
         <Autocomplete
           multiple
