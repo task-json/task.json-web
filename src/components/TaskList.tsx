@@ -267,7 +267,7 @@ export default function TaskList() {
           <AgGridReact
             ref={gridRef}
             pagination={true}
-            paginationPageSize={5}
+            paginationPageSize={state.settings.value.pageSize}
             domLayout="autoHeight"
             rowData={currentTasks.value}
             columnDefs={columnDefs}

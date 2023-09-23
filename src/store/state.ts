@@ -1,5 +1,5 @@
 import { computed, effect, signal } from "@preact/signals";
-import { Task, TaskJson, TaskStatus } from "task.json";
+import { Task } from "task.json";
 import { AlertColor } from "@mui/material/Alert";
 import { Client } from "task.json-client";
 
@@ -15,32 +15,46 @@ export const createNotification = (payload: Notification) => ({
 });
 
 export type Settings = {
+  pageSize: number;
 	maxPriorities: number;
 	dark: boolean;
 	server?: string;
 };
 
+function merge(value: any, init: any) {
+  if (value?.constructor === Object) {
+    // normal JSON-like object
+    return {
+      ...init,
+      ...value
+    };
+  }
+  else {
+    return value || init;
+  }
+}
 
-function loadState(key: string) {
+function loadState(key: string, init: any) {
   try {
-    const data = localStorage.getItem(key);
-    if (data !== null) {
-      return JSON.parse(data);
-    }
+    return merge(
+      JSON.parse(localStorage.getItem(key)),
+      init
+    );
   }
   catch (err: any) {
     console.error(err);
+    return init;
   }
-  return undefined;
 }
 
 // global app state
 export const state = {
-  taskJson: signal<Task[]>(loadState("taskJson") ?? []),
-	settings: signal<Settings>(loadState("settings") ?? {
+  taskJson: signal<Task[]>(loadState("taskJson", [])),
+	settings: signal<Settings>(loadState("settings", {
+    pageSize: 10,
 		maxPriorities: 3,
 		dark: false
-	}),
+	})),
   notifications: signal<Notification[]>([]),
   confirmation: {
     open: signal(false),

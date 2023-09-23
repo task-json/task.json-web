@@ -28,16 +28,27 @@ interface Props {
   open: Signal<boolean>
 }
 
+const validNumber = (value: string, min: number, max: number) => {
+  if (value.length === 0) {
+    return false;
+  }
+  const num = parseInt(value);
+  return num >= min && num <= max;
+};
+
 function SettingsDialog(props: Props) {
   const isSmallDevice = useMediaQuery((theme: Theme) => theme.breakpoints.down("xs"));
   const settings = useComputed(() => state.settings.value);
 
 	// Local states
+	const pageSize = useSignal(settings.value.pageSize.toString());
 	const maxPriorities = useSignal(settings.value.maxPriorities.toString());
-	const errorPriorities = useSignal(false);
 	const server = useSignal(settings.value.server ?? "");
   const serverExists = useComputed(() => server.value.length > 0);
 	const password = useSignal("");
+
+	const pageSizeError = useSignal(false);
+	const priorityError = useSignal(false);
 
   // reset local states
 	const reset = () => {
@@ -45,7 +56,7 @@ function SettingsDialog(props: Props) {
       maxPriorities.value = settings.value.maxPriorities.toString();
       password.value  = "";
       server.value = settings.value.server ?? "";
-      errorPriorities.value = false;
+      priorityError.value = false;
     })
   };
 
@@ -55,15 +66,16 @@ function SettingsDialog(props: Props) {
   };
 
   const save = () => {
-    if (!errorPriorities.value) {
-      // TODO: update token
-      state.settings.value = {
-        ...settings.value,
-        maxPriorities: parseInt(maxPriorities.value),
-        server: serverExists.value ? server.value : undefined
-      };
-
-      props.open.value = false;
+    if (!priorityError.value && !pageSizeError.value) {
+      batch(() => {
+        state.settings.value = {
+          ...settings.value,
+          maxPriorities: parseInt(maxPriorities.value),
+          pageSize: parseInt(pageSize.value),
+          server: serverExists.value ? server.value : undefined
+        };
+        props.open.value = false;
+      });
     }
   };
 
@@ -143,6 +155,34 @@ function SettingsDialog(props: Props) {
 							<Grid item>
 								<ListItemText secondary={
 									<span>
+                    positive integer
+									</span>
+								}>
+									Number of tasks per page
+								</ListItemText>
+							</Grid>
+							<Grid item>
+								<TextField
+                  variant="standard"
+									type="number"
+                  sx={{ maxWidth: "45px" }}
+									error={pageSizeError.value}
+									value={pageSize.value}
+									onChange={(event: any) => {
+										const value = event.target.value;
+                    pageSizeError.value = !validNumber(value, 1, 26);
+                    pageSize.value = value;
+									}}
+								/>
+							</Grid>
+						</Grid>
+					</ListItem>
+
+					<ListItem>
+						<Grid container justifyContent="space-between" alignItems="center">
+							<Grid item>
+								<ListItemText secondary={
+									<span>
 										between 1 and 26
 										(start from <b>A</b>)
 									</span>
@@ -155,17 +195,11 @@ function SettingsDialog(props: Props) {
                   variant="standard"
 									type="number"
                   sx={{ maxWidth: "45px" }}
-									error={errorPriorities.value}
+									error={priorityError.value}
 									value={maxPriorities.value}
-									onChange={event => {
+									onChange={(event: any) => {
 										const value = event.target.value;
-										if (value.length === 0) {
-                      errorPriorities.value = true;
-                    }
-										else {
-											const i = parseInt(value);
-                      errorPriorities.value = i <= 0 || i > 26;
-										}
+                    priorityError.value = !validNumber(value, 1, 26);
                     maxPriorities.value = value;
 									}}
 								/>
