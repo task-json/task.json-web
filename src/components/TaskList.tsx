@@ -60,42 +60,56 @@ function createChipList(items?: string[]) {
 const defaultColDef: ColDef<Task> = {
   resizable: true,
   sortable: true,
-  filter: true
+  filter: true,
+  onCellClicked: (e) => {
+    // do single select by default
+    e.node.setSelected(true, true);
+  }
 };
 
 const columnDefs: ColDef<Task>[] = [
   {
-    field: "priority",
-    headerName: "P",
     checkboxSelection: true,
     headerCheckboxSelection: true,
-    minWidth: 75,
+    width: 16,
+    resizable: false,
+    sortable: false,
+    filter: false,
+    onCellClicked: (e) => {
+      // don't clear existing selections
+      e.node.setSelected(true, false);
+    },
+  },
+  {
+    field: "priority",
+    headerName: "P",
+    minWidth: 40,
     flex: 1
   },
   {
     field: "text",
     minWidth: 200,
-    flex: 3
+    flex: 4
   },
   {
     field: "projects",
     headerName: "Proj",
     minWidth: 80,
-    flex: 2,
+    flex: 3,
     cellRenderer: params => createChipList(params.data.projects)
   },
   {
     field: "contexts",
     headerName: "Ctx",
     minWidth: 80,
-    flex: 2,
+    flex: 3,
     cellRenderer: params => createChipList(params.data.contexts)
   },
   {
     field: "due",
     valueFormatter: params => params.data.due && showDate(DateTime.fromISO(params.data.due)),
     minWidth: 80,
-    flex: 1
+    flex: 2
   }
 ];
 
@@ -295,7 +309,7 @@ export default function TaskList() {
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
             animateRows={true}
-            rowSelection="multiple"
+            suppressRowClickSelection
             onSelectionChanged={onSelectionChanged}
             getRowStyle={getRowStyle.value}
           />
