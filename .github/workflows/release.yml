@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [19.x]
+
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Info
+        id: info
+        run: |
+          RELEASE_NAME="task.json-web-${GITHUB_REF#refs/tags/}"
+          echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
+          echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
+
+      - name: Build task.json-web
+        run: |
+          npm ci --no-optional
+          npm run build
+
+      - name: Create archive
+        run: |
+          cd build
+          zip -9 -r ../$RELEASE_NAME.zip .
+          tar -cavf ../$RELEASE_NAME.tar.zst .
+
+      - name: Upload to GitHub release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file_glob: true
+          file: ./${{ steps.info.outputs.RELEASE_NAME }}.*
+          tag: ${{ github.ref }}
+          overwrite: true
