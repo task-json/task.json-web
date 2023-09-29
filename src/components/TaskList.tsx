@@ -8,7 +8,8 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
-  Theme
+  Theme,
+  Chip
 } from "@mui/material";
 import { batch, useComputed, useSignal } from "@preact/signals";
 import { ColDef, RowClassParams } from "ag-grid-community";
@@ -46,6 +47,16 @@ function showDate(date: DateTime) {
 	return "x";
 }
 
+function createChipList(items?: string[]) {
+  return (
+    <>
+      {items?.map(item => (
+        <Chip size="small" label={item} key={item} />
+      ))}
+    </>
+  );
+}
+
 const defaultColDef: ColDef<Task> = {
   resizable: true,
   sortable: true,
@@ -70,13 +81,15 @@ const columnDefs: ColDef<Task>[] = [
     field: "projects",
     headerName: "Proj",
     minWidth: 80,
-    flex: 2
+    flex: 2,
+    cellRenderer: params => createChipList(params.data.projects)
   },
   {
     field: "contexts",
     headerName: "Ctx",
     minWidth: 80,
-    flex: 2
+    flex: 2,
+    cellRenderer: params => createChipList(params.data.contexts)
   },
   {
     field: "due",

@@ -19,15 +19,7 @@ export default function App() {
     const dark = state.settings.value.dark;
     return createTheme({
       palette: {
-        mode: dark ? "dark" : "light",
-        primary: {
-          main: blue[500],
-          contrastText: "#fff"
-        },
-        secondary: {
-          main: green[500],
-          contrastText: "#fff"
-        }
+        mode: dark ? "dark" : "light"
       },
     });
   });

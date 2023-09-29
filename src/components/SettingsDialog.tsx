@@ -216,7 +216,7 @@ function SettingsDialog(props: Props) {
 							</Grid>
 							<Grid item>
 								<IconButton
-									color="secondary"
+									color="success"
                   sx={{ ml: 1 }}
 									onClick={exportData}
 									title="Export"
