@@ -5,7 +5,6 @@ import { Signal, batch, effect, useSignal } from "@preact/signals";
 import { Task } from "task.json";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
-import { useRef } from "preact/hooks";
 
 interface Props {
   open: Signal<boolean>,
@@ -47,9 +46,9 @@ export default function TaskDialog(props: Props) {
     props.open.value = false;
     reset();
   };
-  const confirm = () => {
+  const submit = () => {
     if (!validate()) {
-      return;
+      return false;
     }
     const date = new Date().toISOString();
     props.onConfirm({
@@ -63,13 +62,32 @@ export default function TaskDialog(props: Props) {
       created: date,
       modified: date
     });
-    close();
+    reset();
+    return true;
+  };
+  const submitAndClose = () => {
+    if (submit()) {
+      props.open.value = false;
+    }
   };
 
   return (
     <Dialog
       open={props.open.value}
-      onClose={close}
+      onKeyUp={(event: KeyboardEvent) => {
+        // Submit on C-Enter and C-Shift-Enter
+        if (event.ctrlKey && event.key === "Enter") {
+          submitAndClose();
+        }
+        else if (event.shiftKey && event.key === "Enter") {
+          submit();
+        }
+      }}
+      onClose={(_, reason) => {
+        if (reason !== "backdropClick") {
+          close();
+        }
+      }}
     >
       <DialogTitle>Add Task</DialogTitle>
       <Box sx={{ display: "flex", flexDirection: "column", px: 3 }}>
@@ -141,7 +159,7 @@ export default function TaskDialog(props: Props) {
         <Button color="error" onClick={reset}>
           Reset
         </Button>
-        <Button onClick={confirm}>
+        <Button onClick={submitAndClose}>
           Submit
         </Button>
       </DialogActions>
