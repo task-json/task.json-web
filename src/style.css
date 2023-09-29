@@ -3,10 +3,10 @@ body {
 }
 
 .ag-theme-alpine {
-  --ag-border-color: #dddddd !important;
+  --ag-border-color: #dfdfdf!important;
 }
 
 .ag-theme-alpine-dark {
-  --ag-border-color: #333333 !important;
+  --ag-border-color: #404040 !important;
 }
 

@@ -29,7 +29,7 @@ export default function Layout(props: Props) {
       <AppBar sx={{ backgroundColor: blue[700], backgroundImage: "none" }} position="sticky">
         <Toolbar>
           <Icon path={mdiStickerCheckOutline} size={1.25} />
-          <Typography variant="h5" noWrap flexGrow={1} ml={2}>
+          <Typography variant="h6" noWrap flexGrow={1} ml={1.5}>
             Task.json Web
           </Typography>
 
