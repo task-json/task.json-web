@@ -4,7 +4,7 @@ import {
   ThemeProvider,
   Typography,
   createTheme,
-  Container,
+  Box,
 } from "@mui/material";
 import { blue, green } from "@mui/material/colors";
 import { state } from "./store/state";
@@ -37,14 +37,24 @@ export default function App() {
       <ThemeProvider theme={theme.value}>
         <CssBaseline />
         <Layout>
-          <Container>
+          <Box sx={{
+            maxWidth: {
+              lg: "90%",
+              // 90% of xl breakpoints 1536px
+              xl: "1382px"
+            },
+            px: {
+              xs: 2,
+              md: 4
+            },
+            margin: "auto"
+          }}>
             <Typography sx={{ mb: 2 }} variant="h5">
               Tasks
             </Typography>
 
             <TaskList />
-          </Container>
-
+          </Box>
           <ConfirmationDialog />
         </Layout>
       </ThemeProvider>

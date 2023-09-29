@@ -49,7 +49,7 @@ function showDate(date: DateTime) {
 const defaultColDef: ColDef<Task> = {
   resizable: true,
   sortable: true,
-  filter: true,
+  filter: true
 };
 
 const columnDefs: ColDef<Task>[] = [
@@ -57,23 +57,32 @@ const columnDefs: ColDef<Task>[] = [
     field: "priority",
     headerName: "P",
     checkboxSelection: true,
-    headerCheckboxSelection: true
-  },
-  {
-    field: "text",
+    headerCheckboxSelection: true,
+    minWidth: 75,
     flex: 1
   },
   {
+    field: "text",
+    minWidth: 200,
+    flex: 3
+  },
+  {
     field: "projects",
-    headerName: "Proj"
+    headerName: "Proj",
+    minWidth: 80,
+    flex: 2
   },
   {
     field: "contexts",
-    headerName: "Ctx"
+    headerName: "Ctx",
+    minWidth: 80,
+    flex: 2
   },
   {
     field: "due",
-    valueFormatter: params => params.data.due && showDate(DateTime.fromISO(params.data.due))
+    valueFormatter: params => params.data.due && showDate(DateTime.fromISO(params.data.due)),
+    minWidth: 80,
+    flex: 1
   }
 ];
 
