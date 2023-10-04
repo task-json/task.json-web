@@ -1,5 +1,5 @@
 import Icon from "@mdi/react";
-import { state } from "../store/state";
+import { computedState, state } from "../store/state";
 import {
   useMediaQuery,
   SxProps,
@@ -11,8 +11,8 @@ import {
   Theme,
   Chip
 } from "@mui/material";
-import { batch, useComputed, useSignal } from "@preact/signals";
-import { ColDef, RowClassParams } from "ag-grid-community";
+import { batch, computed, useComputed, useSignal } from "@preact/signals";
+import { CellValueChangedEvent, ColDef, RowClassParams } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { mdiCheck, mdiClockOutline, mdiDelete, mdiEraserVariant, mdiPlus, mdiRestore } from "@mdi/js";
 import TaskDialog from "./TaskDialog";
@@ -67,7 +67,7 @@ const defaultColDef: ColDef<Task> = {
   }
 };
 
-const columnDefs: ColDef<Task>[] = [
+const columnDefs = computed<ColDef<Task>[]>(() => [
   {
     checkboxSelection: true,
     headerCheckboxSelection: true,
@@ -84,18 +84,25 @@ const columnDefs: ColDef<Task>[] = [
     field: "priority",
     headerName: "P",
     minWidth: 40,
-    flex: 1
+    flex: 1,
+    editable: true,
+    cellEditor: "agSelectCellEditor",
+    cellEditorParams: {
+      values: computedState.allPriorities.value
+    }
   },
   {
     field: "text",
     minWidth: 200,
-    flex: 4
+    flex: 4,
+    editable: true
   },
   {
     field: "projects",
     headerName: "Proj",
     minWidth: 80,
     flex: 3,
+    // editable: true,
     cellRenderer: params => createChipList(params.data.projects)
   },
   {
@@ -103,15 +110,17 @@ const columnDefs: ColDef<Task>[] = [
     headerName: "Ctx",
     minWidth: 80,
     flex: 3,
+    // editable: true,
     cellRenderer: params => createChipList(params.data.contexts)
   },
   {
     field: "due",
     valueFormatter: params => params.data.due && showDate(DateTime.fromISO(params.data.due)),
     minWidth: 80,
-    flex: 2
+    flex: 2,
+    // editable: true
   }
-];
+]);
 
 const toggleButtonStyle: SxProps = {
   px: 2.5,
@@ -145,6 +154,19 @@ export default function TaskList() {
   const onSelectionChanged = () => {
     selectedTasks.value = gridRef.current.api.getSelectedRows();
   };
+  const onCellValueChanged = (e: CellValueChangedEvent<Task>) => {
+    // update one task
+    batch(() => {
+      state.taskJson.value = state.taskJson.value.map(t => (
+        t.id === e.data.id
+          ? e.data
+          : t
+      ));
+      // editing a cel will clear selection
+      selectedTasks.value = [];
+    })
+  };
+
   const addTask = (task: Task) => {
     state.taskJson.value = [...state.taskJson.value, task];
   };
@@ -200,7 +222,6 @@ export default function TaskList() {
       };
     };
   });
-
 
   return (
     <>
@@ -306,12 +327,13 @@ export default function TaskList() {
             paginationPageSize={state.settings.value.pageSize}
             domLayout="autoHeight"
             rowData={currentTasks.value}
-            columnDefs={columnDefs}
+            columnDefs={columnDefs.value}
             defaultColDef={defaultColDef}
             animateRows={true}
             suppressRowClickSelection
-            onSelectionChanged={onSelectionChanged}
             getRowStyle={getRowStyle.value}
+            onSelectionChanged={onSelectionChanged}
+            onCellValueChanged={onCellValueChanged}
           />
         </Box>
 
