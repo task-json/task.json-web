@@ -61,6 +61,7 @@ const defaultColDef: ColDef<Task> = {
   resizable: true,
   sortable: true,
   filter: true,
+  editable: true,
   onCellClicked: (e) => {
     // do single select by default
     e.node.setSelected(true, true);
@@ -85,7 +86,9 @@ const columnDefs = computed<ColDef<Task>[]>(() => [
     headerName: "P",
     minWidth: 40,
     flex: 1,
-    editable: true,
+    comparator: (_v1, _v2, n1, n2) => ( taskUrgency(n1.data) - taskUrgency(n2.data) ),
+    sort: "desc",
+    sortingOrder: [ "desc", "asc" ],
     cellEditor: "agSelectCellEditor",
     cellEditorParams: {
       values: computedState.allPriorities.value
@@ -95,14 +98,14 @@ const columnDefs = computed<ColDef<Task>[]>(() => [
     field: "text",
     minWidth: 200,
     flex: 4,
-    editable: true
   },
   {
     field: "projects",
     headerName: "Proj",
     minWidth: 80,
     flex: 3,
-    // editable: true,
+    // TODO
+    editable: false,
     cellRenderer: params => createChipList(params.data.projects)
   },
   {
@@ -110,7 +113,8 @@ const columnDefs = computed<ColDef<Task>[]>(() => [
     headerName: "Ctx",
     minWidth: 80,
     flex: 3,
-    // editable: true,
+    // TODO
+    editable: false,
     cellRenderer: params => createChipList(params.data.contexts)
   },
   {
@@ -118,7 +122,8 @@ const columnDefs = computed<ColDef<Task>[]>(() => [
     valueFormatter: params => params.data.due && showDate(DateTime.fromISO(params.data.due)),
     minWidth: 80,
     flex: 2,
-    // editable: true
+    // TODO
+    editable: false
   }
 ]);
 
