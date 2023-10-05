@@ -5,6 +5,7 @@ import { Signal, batch, effect, useSignal } from "@preact/signals";
 import { Task } from "task.json";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
+import { normalizeTask } from "../utils/task";
 
 interface Props {
   open: Signal<boolean>,
@@ -51,17 +52,17 @@ export default function TaskDialog(props: Props) {
       return false;
     }
     const date = new Date().toISOString();
-    props.onConfirm({
+    props.onConfirm(normalizeTask({
       id: uuidv4(),
       status: "todo",
       priority: priority.value,
       text: text.value,
-      projects: projects.value.length ? projects.value : undefined,
-      contexts: contexts.value.length ? projects.value : undefined,
+      projects: projects.value,
+      contexts: contexts.value,
       due: due.value ? due.value.toISO() : undefined,
       created: date,
       modified: date
-    });
+    }));
     reset();
     return true;
   };

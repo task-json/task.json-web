@@ -21,6 +21,7 @@ import { useRef } from "preact/hooks";
 import { CSSProperties } from "preact/compat";
 import { amber, cyan, red } from "@mui/material/colors";
 import { DateTime, DurationObjectUnits } from "luxon";
+import { normalizeTask } from "../utils/task";
 
 function showDate(date: DateTime) {
 	type Unit = keyof DurationObjectUnits;
@@ -91,7 +92,7 @@ const columnDefs = computed<ColDef<Task>[]>(() => [
     sortingOrder: [ "desc", "asc" ],
     cellEditor: "agSelectCellEditor",
     cellEditorParams: {
-      values: computedState.allPriorities.value
+      values: ["", ...computedState.allPriorities.value]
     }
   },
   {
@@ -164,7 +165,10 @@ export default function TaskList() {
     batch(() => {
       state.taskJson.value = state.taskJson.value.map(t => (
         t.id === e.data.id
-          ? e.data
+          ? normalizeTask({
+            ...e.data,
+            modified: new Date().toISOString()
+          })
           : t
       ));
       // editing a cel will clear selection
