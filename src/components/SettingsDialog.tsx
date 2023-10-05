@@ -17,7 +17,7 @@ import {
   Theme
 } from "@mui/material";
 import FileSaver from "file-saver";
-import { serializeTaskJson } from "task.json";
+import { deserializeTaskJson, serializeTaskJson } from "task.json";
 import { state } from "../store/state";
 import { useComputed, useSignal, batch, Signal } from "@preact/signals";
 import Icon from '@mdi/react';
@@ -85,7 +85,7 @@ function SettingsDialog(props: Props) {
 
     const reader = new FileReader();
 		reader.onload = () => {
-			const taskJson = JSON.parse(reader.result as string);
+			const taskJson = deserializeTaskJson(reader.result as string);
       state.taskJson.value = taskJson;
       state.notifications.value = [
         ...state.notifications.value,
