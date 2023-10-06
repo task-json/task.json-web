@@ -1,141 +1,71 @@
-import { useState } from 'react';
-import TaskList from "./components/TaskList";
-import Layout from "./components/Layout";
-import TaskDialog from "./components/TaskDialog";
-import { Task, TaskType } from "task.json";
-import { useSelector } from "react-redux";
-import { RootState } from "./store";
+// Copyright (C) 2023  DCsunset
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import { useComputed } from "@preact/signals";
 import {
-  Container,
-  makeStyles,
-  Typography,
-  fade,
   CssBaseline,
-  createMuiTheme,
   ThemeProvider,
-  useMediaQuery
-} from '@material-ui/core';
-import {
-  ToggleButton,
-  ToggleButtonGroup
-} from "@material-ui/lab";
-import {
-  Schedule as ScheduleIcon,
-  Check as CheckIcon,
-  Delete as DeleteIcon
-} from "@material-ui/icons"
-import { green, blue } from '@material-ui/core/colors';
+  Typography,
+  createTheme,
+  Box,
+} from "@mui/material";
+import { blue, green } from "@mui/material/colors";
+import { state } from "./store/state";
+import Layout from "./components/Layout";
+import TaskList from "./components/TaskList";
+import ConfirmationDialog from "./components/ConfirmationDialog";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
-const createTheme = (dark: boolean) => createMuiTheme({
-  palette: {
-    primary: {
-      main: blue[500],
-      contrastText: "#fff"
-    },
-    secondary: {
-      main: green[500],
-      contrastText: "#fff"
-    },
-    type: dark ? "dark" : "light"
-  }
-});
-
-const useStyles = makeStyles(theme => ({
-  head: {
-    marginBottom: theme.spacing(2)
-  },
-  select: {
-    minWidth: 120,
-    marginBottom: theme.spacing(1.5)
-  },
-  toggleGroup: {
-    marginBottom: theme.spacing(2),
-    flexWrap: "wrap"
-  },
-  toggleButton: {
-    paddingLeft: theme.spacing(2.5),
-    paddingRight: theme.spacing(2.5),
-    "&.Mui-selected": {
-      color: blue[500],
-      backgroundColor: fade(blue[500], 0.12)
-    },
-    "&.Mui-selected:hover": {
-      color: blue[500],
-      backgroundColor: fade(blue[500], 0.18)
-    }
-  },
-  icon: {
-    marginRight: theme.spacing(0.5)
-  }
-}));
-
-function App() {
-  const dark = useSelector((state: RootState) => state.settings.dark);
-  const theme = createTheme(dark);
-  const classes = useStyles();
-  const [taskDialog, setTaskDialog] = useState(false);
-  const [taskType, setTaskType] = useState<TaskType>("todo");
-  const [currentTask, setCurrentTask] = useState<Task | null>(null);
-
-  const isSmallDevice = useMediaQuery(theme.breakpoints.down("xs"));
-
-  const handleTaskType = (_event: React.MouseEvent<HTMLElement>, newType: TaskType | null) => {
-    if (newType)
-      setTaskType(newType);
-  };
-  const handleDialogClose = () => {
-    setTaskDialog(false);
-    setCurrentTask(null);
-  };
+export default function App() {
+  const theme = useComputed(() => {
+    const dark = state.settings.value.dark;
+    return createTheme({
+      palette: {
+        mode: dark ? "dark" : "light"
+      },
+    });
+  });
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Layout>
-        <TaskDialog
-          open={taskDialog}
-          onClose={handleDialogClose}
-          task={currentTask}
-          taskType={taskType}
-        />
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <ThemeProvider theme={theme.value}>
+        <CssBaseline />
+        <Layout>
+          <Box sx={{
+            maxWidth: {
+              lg: "90%",
+              // 90% of xl breakpoints 1536px
+              xl: "1382px"
+            },
+            px: {
+              xs: 2,
+              md: 4
+            },
+            margin: "auto"
+          }}>
+            <Typography sx={{ mb: 2 }} variant="h5">
+              Tasks
+            </Typography>
 
-        <Container>
-          <Typography className={classes.head} variant="h5">
-            Tasks
-          </Typography>
-
-          <ToggleButtonGroup
-            value={taskType}
-            onChange={handleTaskType}
-            exclusive
-            className={classes.toggleGroup}
-          >
-            <ToggleButton value="todo" className={classes.toggleButton}>
-              <ScheduleIcon className={classes.icon} />
-              { isSmallDevice || "todo" }
-            </ToggleButton>
-            <ToggleButton value="done" className={classes.toggleButton}>
-              <CheckIcon className={classes.icon} />
-              { isSmallDevice || "done" }
-            </ToggleButton>
-            <ToggleButton value="removed" className={classes.toggleButton}>
-              <DeleteIcon className={classes.icon} />
-              { isSmallDevice || "removed" }
-            </ToggleButton>
-          </ToggleButtonGroup>
-
-          <TaskList
-            taskType={taskType}
-            onAdd={() => setTaskDialog(true)}
-            onEdit={task => {
-              setCurrentTask(task);
-              setTaskDialog(true);
-            }}
-          />
-        </Container>
-      </Layout>
-    </ThemeProvider>
+            <TaskList />
+          </Box>
+          <ConfirmationDialog />
+        </Layout>
+      </ThemeProvider>
+    </LocalizationProvider>
   );
 }
 
-export default App;

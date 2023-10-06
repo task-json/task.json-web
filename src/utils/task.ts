@@ -1,15 +1,25 @@
-import { TaskJson, TaskType } from "task.json";
+// Copyright (C) 2023  DCsunset
 
-export function getFieldValues(taskJson: TaskJson, field: "projects" | "contexts") {
-  const values: Set<string> = new Set();
-  const types: TaskType[] = ["todo", "done"];
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 
-  for (const type of types) {
-    for (const task of taskJson[type]) {
-      task[field]?.forEach(value => {
-        values.add(value);
-      });
-    }
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import { Task } from "task.json";
+
+export function normalizeTask(task: Task) {
+  return {
+    ...task,
+    priority: task.priority?.length ? task.priority : undefined,
+    projects: task.projects?.length ? task.projects : undefined,
+    contexts: task.contexts?.length ? task.contexts : undefined
   }
-  return values;
 }

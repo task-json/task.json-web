@@ -1,131 +1,79 @@
-import {
-	AppBar,
-	duration,
-	IconButton,
-	makeStyles,
-	Snackbar,
-	Toolbar,
-	Typography
-} from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, rootActions } from "../store";
-import { Notification } from "../types";
-import {
-	Cog as CogIcon,
-	StickerCheckOutline as StickerCheckOutlineIcon,
-	Brightness4 as Brightness4Icon,
-	Brightness7 as Brightness7Icon
-} from "mdi-material-ui";
+// Copyright (C) 2023  DCsunset
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import { state } from "../store/state";
+import { AppBar, Box, Toolbar, Typography, IconButton } from "@mui/material";
+import { blue } from "@mui/material/colors";
+import Icon from '@mdi/react';
+import { mdiStickerCheckOutline, mdiBrightness4, mdiBrightness7, mdiCog } from '@mdi/js';
+import { signal, useComputed } from "@preact/signals";
 import SettingsDialog from "./SettingsDialog";
-import { blue } from '@material-ui/core/colors';
+
 
 interface Props {
 	children?: any;
 };
 
-const useStyles = makeStyles(theme => ({
-	content: {
-		paddingTop: theme.spacing(3),
-		paddingBottom: theme.spacing(3)
-	},
-	icon: {
-		marginRight: theme.spacing(2)
-	},
-	title: {
-		flexGrow: 1
-	},
-	appBar: {
-		backgroundColor: blue[700]
-	}
-}));
+export default function Layout(props: Props) {
+  const dark = useComputed(() => state.settings.value.dark);
 
-function Layout(props: Props) {
-	const classes = useStyles();
-	const rootState = useSelector((state: RootState) => state);
-	const notifications = rootState.notifications;
-	const dark = rootState.settings.dark;
-	const dispatch = useDispatch();
-  const [settingsDialog, setSettingsDialog] = useState(false);
+  const settingsDialog = signal(false);
 
-	// To-be-removed notifications
-	const [invalidNotifications, setInvalidNotifications] = useState([] as string[]);
-	const handleSnackbarClose = (reason: string, notification: Notification) => {
-		if (reason === "clickaway") {
-			return;
-		}
-		setInvalidNotifications(invalidNotifications.concat([notification.id!]));
+  const toggleTheme = () => {
+    state.settings.value = {
+      ...state.settings.value,
+      dark: !dark.value
+    };
+  };
 
-		// Wait until transition finishes
-		setTimeout(() => {
-			setInvalidNotifications(invalidNotifications.filter(e => e !== notification.id));
-			dispatch(rootActions.removeNotification(notification.id!));
-		}, duration.leavingScreen);
-	};
-
-	const handleDarkTheme = () => {
-		dispatch(rootActions.updateSettings({
-			dark: !dark
-		}));
-	};
-
-	return (
-		<>
-			<AppBar className={classes.appBar} position="sticky">
-				<Toolbar>
-					<StickerCheckOutlineIcon className={classes.icon} />
-					<Typography variant="h6" noWrap className={classes.title}>
-						Task.json Web
-					</Typography>
+  return (
+    <>
+      {/* Disable backgroundImage to avoid color change in dark theme */}
+      <AppBar sx={{ backgroundColor: blue[700], backgroundImage: "none" }} position="sticky">
+        <Toolbar>
+          <Icon path={mdiStickerCheckOutline} size={1.25} />
+          <Typography variant="h6" noWrap flexGrow={1} ml={1.5}>
+            Task.json Web
+          </Typography>
 
 					<IconButton
 						color="inherit"
-						title={`Switch to ${dark ? "light" : "dark"} mode`}
-						onClick={handleDarkTheme}
+						title={`Switch to ${dark.value ? "light" : "dark"} mode`}
+						onClick={toggleTheme}
 					>
-						{dark && <Brightness4Icon />}
-						{!dark && <Brightness7Icon />}
+						{dark.value ?
+              <Icon path={mdiBrightness4} size={1.25} /> :
+              <Icon path={mdiBrightness7} size={1.25} />}
 					</IconButton>
 
 					<IconButton
 						color="inherit"
 						title="Settings"
-						onClick={() => setSettingsDialog(true)}
+						onClick={() => settingsDialog.value = true}
 					>
-						<CogIcon />
+            <Icon path={mdiCog} size={1.25} />
 					</IconButton>
-				</Toolbar>
-			</AppBar>
+        </Toolbar>
+      </AppBar>
 
-      <SettingsDialog
-        open={settingsDialog}
-        onClose={() => setSettingsDialog(false)}
-      />
+      <SettingsDialog open={settingsDialog} />
 
-			{notifications.map(notification => (
-				<Snackbar
-					key={notification.id}
-					open={!invalidNotifications.includes(notification.id!)}
-					autoHideDuration={6000}
-					onClose={(_, reason) => handleSnackbarClose(reason, notification)}
-				>
-					<Alert
-						elevation={6}
-						variant="filled"
-						onClose={() => handleSnackbarClose("", notification)}
-						severity={notification.severity}
-					>
-						{notification.text}
-					</Alert>
-				</Snackbar>
-			))}
-
-			<div className={classes.content}>
+      <Box sx={{ my: 3 }}>
 				{props.children}
-			</div>
-		</>
-	);
+      </Box>
+    </>
+  );
 }
 
-export default Layout;

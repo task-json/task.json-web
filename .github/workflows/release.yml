@@ -1,9 +1,9 @@
-name: Build and Release
+name: Release
 
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
 
 jobs:
   build:
@@ -11,30 +11,30 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [15.x]
+        node-version: [19.x]
 
     steps:
       - name: Checkout codebase
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      
+
       - name: Info
         id: info
         run: |
-          export _NAME="task.json-web-${GITHUB_REF#refs/tags/}"
-          echo "::set-output name=RELEASE_NAME::$_NAME"
-          echo "RELEASE_NAME=$_NAME" >> $GITHUB_ENV
+          RELEASE_NAME="task.json-web-${GITHUB_REF#refs/tags/}"
+          echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
+          echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
 
       - name: Build task.json-web
         run: |
           npm ci --no-optional
           npm run build
 
-      - name: Create archive 
+      - name: Create archive
         run: |
           cd build
           zip -9 -r ../$RELEASE_NAME.zip .
@@ -48,4 +48,3 @@ jobs:
           file: ./${{ steps.info.outputs.RELEASE_NAME }}.*
           tag: ${{ github.ref }}
           overwrite: true
-

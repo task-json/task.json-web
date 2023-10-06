@@ -1,0 +1,56 @@
+* Task.json-web
+
+[[https://github.com/task-json/task.json-web/actions/workflows/release.yml/badge.svg]]
+
+Task management Web UI written in Preact//React.js based on [[https://github.com/task-json/task.json][task.json]] format.
+
+
+** Screenshots
+
+[[./pictures/screenshot-light.png]]
+
+[[./pictures/screenshot-dark.png]]
+
+
+** Features
+
+- Material Design UI
+- Inline task editing
+- Static web page (no backend server needed to deploy)
+- Task synchronization and backup with [[https://github.com/task-json/task.json-server][task.json-server]]
+- Dark and light themes
+- Self-hosted
+
+** Build
+
+To manually build from source, clone this repository and run the following commands:
+
+#+begin_src shell
+npm install
+npm run build
+#+end_src
+
+The packed files can then be found in =build= directory.
+
+
+** License
+
+This project is licensed under AGPL-3.0.
+
+#+begin_quote
+Copyright (C) 2023  DCsunset
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#+end_quote
+

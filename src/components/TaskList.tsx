@@ -1,486 +1,368 @@
-import { green, red, blue, cyan, amber } from "@material-ui/core/colors"
-import { Chip, IconButton, makeStyles, Tooltip } from "@material-ui/core";
-import MUIDataTable from "mui-datatables";
+// Copyright (C) 2023  DCsunset
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import Icon from "@mdi/react";
+import { computedState, state } from "../store/state";
 import {
-	Plus as PlusIcon,
-	Delete as DeleteIcon,
-	Pencil as PencilIcon,
-	Restore as RestoreIcon,
-	Check as CheckIcon,
-	Close as CloseIcon
-} from "mdi-material-ui";
-import { TaskType, Task, taskUrgency } from "task.json";
-import { DateTime } from "luxon";
-import { useDispatch, useSelector } from "react-redux";
-import { rootActions, RootState } from "../store";
-import { useState } from "react";
-import ConfirmationDialog from "./ConfirmationDialog";
-import urlRegex from "url-regex-safe";
-import normalizeUrl from "normalize-url";
+  useMediaQuery,
+  SxProps,
+  Box,
+  Card,
+  IconButton,
+  ToggleButton,
+  ToggleButtonGroup,
+  Theme,
+  Chip
+} from "@mui/material";
+import { batch, computed, useComputed, useSignal } from "@preact/signals";
+import { CellValueChangedEvent, ColDef, RowClassParams } from "ag-grid-community";
+import { AgGridReact } from "ag-grid-react";
+import { mdiCheck, mdiClockOutline, mdiDelete, mdiEraserVariant, mdiPlus, mdiRestore } from "@mdi/js";
+import TaskDialog from "./TaskDialog";
+import { Task, TaskStatus, taskUrgency } from "task.json";
+import { useRef } from "preact/hooks";
+import { CSSProperties } from "preact/compat";
+import { amber, cyan, red } from "@mui/material/colors";
+import { DateTime, DurationObjectUnits } from "luxon";
+import { normalizeTask } from "../utils/task";
 
-interface Props {
-	onAdd: () => void;
-	onEdit: (task: Task) => void;
-	taskType: TaskType;
+function showDate(date: DateTime) {
+	type Unit = keyof DurationObjectUnits;
+	const units: Unit[] = ["years", "months", "days", "hours", "minutes", "seconds"];
+	const shortUnit = (unit: Unit) => {
+		let short = unit.charAt(0);
+		if (short === "m" && unit === "months")
+			short = "M";
+		return short;
+	};
+
+	const duration = date.diffNow(units);
+	for (const unit of units) {
+		const value = duration[unit];
+		if (value < 0)
+			return "x";
+		if (value > 0) {
+			if (unit === "seconds")
+				return "<1m";
+			return `${value}${shortUnit(unit)}`;
+		}
+	}
+
+	return "x";
 }
 
-const useStyles = makeStyles(theme => ({
-	add: {
-		"&:hover": {
-			color: green[500]
-		}
-	},
-	edit: {
-		"&:hover": {
-			color: blue[500]
-		}
-	},
-	del: {
-		"&:hover": {
-			color: red[500]
-		}
-	},
-	toolbarSelect: {
-		marginRight: theme.spacing(2)
-	},
-	actionButton: {
-		marginLeft: theme.spacing(0.2)
-	},
-	chip: {
-		marginRight: theme.spacing(1),
-		marginTop: theme.spacing(0.5),
-		marginBottom: theme.spacing(0.5)
-	},
-	cyan: {
-		fontWeight: 500,
-		color: theme.palette.type === "dark" ? cyan[500] : cyan[600] 
-	},
-	red: {
-		fontWeight: 500,
-		color: red[400]
-	},
-	amber: {
-		fontWeight: 500,
-		color: theme.palette.type === "dark" ? amber[500] : amber[800] 
-	}
-}));
-
-
-interface CustomToolbarProps {
-	taskType: TaskType;
-	onAdd: () => void;
-};
-
-// The actions are appended to the original toolbar actions
-const CustomToolbar = (props: CustomToolbarProps) => {
-	const classes = useStyles();
-
-	return (
-		<>
-			{props.taskType === "todo" &&
-				<Tooltip title="Add Task">
-					<IconButton className={classes.add} onClick={props.onAdd}>
-						<PlusIcon />
-					</IconButton>
-				</Tooltip>
-			}
-		</>
-	);
-};
-
-
-interface CustomToolbarSelectProps {
-	taskType: TaskType;
-	onRemove: () => void;
-	onErase: () => void;
-	onUndo: () => void;
-	onDo: () => void;
-};
-
-const CustomToolbarSelect = (props: CustomToolbarSelectProps) => {
-	const classes = useStyles();
-
-	return (
-		<div className={classes.toolbarSelect}>
-			{props.taskType !== "todo" &&
-				<Tooltip title="Undo Tasks">
-					<IconButton
-						className={classes.add}
-						onClick={props.onUndo}
-					>
-						<RestoreIcon />
-					</IconButton>
-				</Tooltip>
-			}
-			{props.taskType === "todo" &&
-				<Tooltip title="Do Tasks">
-					<IconButton
-						className={classes.add}
-						onClick={props.onDo}
-					>
-						<CheckIcon />
-					</IconButton>
-				</Tooltip>
-			}
-			{props.taskType !== "removed" &&
-				<Tooltip title="Remove Tasks">
-					<IconButton
-						className={classes.del}
-						onClick={props.onRemove}
-					>
-						<DeleteIcon />
-					</IconButton>
-				</Tooltip>
-			}
-			{props.taskType === "removed" &&
-				<Tooltip title="Erase Tasks">
-					<IconButton
-						className={classes.del}
-						onClick={props.onErase}
-					>
-						<CloseIcon />
-					</IconButton>
-				</Tooltip>
-			}
-		</div>
-	);
-};
-
-interface ActionsProps {
-	taskType: TaskType;
-	task: Task;
-	onRemove: (ids: string[]) => void;
-	onErase: (ids: string[]) => void;
-	onUndo: (ids: string[]) => void;
-	onDo: (ids: string[]) => void;
-	onEdit: (task: Task) => void;
-};
-
-const Actions = (props: ActionsProps) => {
-	const classes = useStyles();
-
-	return (
-		<>
-			{props.taskType === "todo" &&
-				<Tooltip title="Do">
-					<IconButton
-						className={`${classes.add} ${classes.actionButton}`}
-						size="small"
-						onClick={() => props.onDo([props.task.id])}
-					>
-						<CheckIcon />
-					</IconButton>
-				</Tooltip>
-			}
-			{props.taskType !== "todo" &&
-				<Tooltip title="Undo">
-					<IconButton
-						className={`${classes.add} ${classes.actionButton}`}
-						size="small"
-						onClick={() => props.onUndo([props.task.id])}
-					>
-						<RestoreIcon />
-					</IconButton>
-				</Tooltip>
-			}
-			<Tooltip title="Edit">
-				<IconButton
-					className={classes.edit}
-					size="small"
-					onClick={() => props.onEdit(props.task)}
-				>
-					<PencilIcon />
-				</IconButton>
-			</Tooltip>
-			{props.taskType !== "removed" &&
-				<Tooltip title="Remove">
-					<IconButton
-						className={`${classes.del} ${classes.actionButton}`}
-						size="small"
-						onClick={() => props.onRemove([props.task.id])}
-					>
-						<DeleteIcon />
-					</IconButton>
-				</Tooltip>
-			}
-			{props.taskType === "removed" &&
-				<Tooltip title="Erase">
-					<IconButton
-						className={`${classes.del} ${classes.actionButton}`}
-						size="small"
-						onClick={() => props.onErase([props.task.id])}
-					>
-						<CloseIcon />
-					</IconButton>
-				</Tooltip>
-			}
-		</>
-	);
-};
-
-
-interface TaskTextProps {
-	text: string;
-	className: string;
-};
-
-// Linkify urls
-function TaskText(props: TaskTextProps) {
-	const regex = urlRegex();
-	const text = props.text;
-
-	let match: RegExpExecArray | null;
-	let lastIndex = 0;
-	let result = <></>;
-	while ((match = regex.exec(text)) !== null) {
-		const str = text.substring(lastIndex, match.index);
-		const url = (
-			<a
-				className={props.className}
-				target="_blank"
-				rel="noreferrer"
-				href={normalizeUrl(match[0])}
-				style={{ color: "inherit" }}
-			>
-				{match[0]}
-			</a>
-		);
-		result = <>{result}{str}{url}</>;
-		lastIndex = match.index + match[0].length;
-	}
-	result = <span className={props.className}>{result}{text.substring(lastIndex)}</span>;
-
-	return result;
+function createChipList(items?: string[]) {
+  return (
+    <>
+      {items?.map(item => (
+        <Chip size="small" label={item} key={item} />
+      ))}
+    </>
+  );
 }
 
-function TaskList(props: Props) {
-	const [confirmationText, setConfirmationText] = useState("");
-	const [confirmationDialog, setConfirmationDialog] = useState(false);
-	const [eraseIds, setEraseIds] = useState([] as string[]);
-	const classes = useStyles();
-	const dispatch = useDispatch();
+const defaultColDef: ColDef<Task> = {
+  resizable: true,
+  sortable: true,
+  filter: true,
+  editable: true,
+  onCellClicked: (e) => {
+    // do single select by default
+    e.node.setSelected(true, true);
+  }
+};
 
-	const originalTasks = useSelector(
-		(state: RootState) => (
-			state.taskJson[props.taskType].map(task => ({
-				...task,
-				due: task.due && DateTime.fromISO(task.due).toFormat("yyyy-MM-dd")
-			}))
-		)
-	);
+const columnDefs = computed<ColDef<Task>[]>(() => [
+  {
+    checkboxSelection: true,
+    headerCheckboxSelection: true,
+    width: 16,
+    resizable: false,
+    sortable: false,
+    filter: false,
+    onCellClicked: (e) => {
+      // don't clear existing selections
+      e.node.setSelected(true, false);
+    },
+  },
+  {
+    field: "priority",
+    headerName: "P",
+    minWidth: 40,
+    flex: 1,
+    comparator: (_v1, _v2, n1, n2) => ( taskUrgency(n1.data) - taskUrgency(n2.data) ),
+    sort: "desc",
+    sortingOrder: [ "desc", "asc" ],
+    cellEditor: "agSelectCellEditor",
+    cellEditorParams: {
+      values: ["", ...computedState.allPriorities.value]
+    }
+  },
+  {
+    field: "text",
+    minWidth: 200,
+    flex: 4,
+  },
+  {
+    field: "projects",
+    headerName: "Proj",
+    minWidth: 80,
+    flex: 3,
+    // TODO
+    editable: false,
+    cellRenderer: params => createChipList(params.data.projects)
+  },
+  {
+    field: "contexts",
+    headerName: "Ctx",
+    minWidth: 80,
+    flex: 3,
+    // TODO
+    editable: false,
+    cellRenderer: params => createChipList(params.data.contexts)
+  },
+  {
+    field: "due",
+    valueFormatter: params => params.data.due && showDate(DateTime.fromISO(params.data.due)),
+    minWidth: 80,
+    flex: 2,
+    // TODO
+    editable: false
+  }
+]);
 
-	// sorted tasks
-	let tasks: Task[];
-	// Map<id, urgency>
-	const urgencyMap = new Map<string, number>();
-	if (props.taskType === "todo") {
-		for (const task of originalTasks) {
-			urgencyMap.set(task.id, taskUrgency(task));
-		}
-		tasks = originalTasks.sort(
-			(a, b) => urgencyMap.get(b.id)! - urgencyMap.get(a.id)!
-		);
-	}
-	else {
-		tasks = originalTasks;
-	}
+const toggleButtonStyle: SxProps = {
+  px: 2.5,
+  "&:not(.Mui-selected)": {
+    opacity: 0.7
+  }
+};
 
-	const removeTasks = (ids: string[]) => {
-		if (props.taskType !== "removed") {
-			dispatch(rootActions.removeTasks({
-				type: props.taskType,
-				ids
-			}));
-		}
-	};
+export default function TaskList() {
+  const agTheme = useComputed(() => (
+    state.settings.value.dark
+      ? "ag-theme-alpine-dark"
+      : "ag-theme-alpine"
+  ));
+  const isSmallDevice = useMediaQuery((theme: Theme) => theme.breakpoints.down("xs"));
+  const taskStatus = useSignal<TaskStatus>("todo");
+  const gridRef = useRef<AgGridReact<Task>>();
+  const taskDialog = useSignal(false);
+  const selectedTasks = useSignal<Task[]>([]);
+  const getSelectedIds = () => {
+    return selectedTasks.value.reduce(
+      (acc, t) => acc.add(t.id),
+      new Set<string>()
+    );
+  };
 
-	const handleEraseCancel = () => {
-		setConfirmationDialog(false);
-	};
-	const handleErase = (ids: string[]) => {
-		setEraseIds(ids);
-		setConfirmationText("Warning: This will delete tasks permanently. Make sure the erased tasks are not in other servers and clients if you want to sync with them. Are you sure to erase?");
-		setConfirmationDialog(true);
-	};
-	const eraseTasks = () => {
-		setConfirmationDialog(false);
-		dispatch(rootActions.eraseTasks(eraseIds));
-	};
+  const currentTasks = useComputed(() => (
+    state.taskJson.value.filter(t => t.status === taskStatus.value)
+  ));
 
-	const undoTasks = (ids: string[]) => {
-		if (props.taskType !== "todo") {
-			dispatch(rootActions.undoTasks({
-				type: props.taskType,
-				ids
-			}));
-		}
-	};
+  const onSelectionChanged = () => {
+    selectedTasks.value = gridRef.current.api.getSelectedRows();
+  };
+  const onCellValueChanged = (e: CellValueChangedEvent<Task>) => {
+    // update one task
+    batch(() => {
+      state.taskJson.value = state.taskJson.value.map(t => (
+        t.id === e.data.id
+          ? normalizeTask({
+            ...e.data,
+            modified: new Date().toISOString()
+          })
+          : t
+      ));
+      // editing a cel will clear selection
+      selectedTasks.value = [];
+    })
+  };
 
-	const doTasks = (ids: string[]) => {
-		dispatch(rootActions.doTasks(ids));
-	};
+  const addTask = (task: Task) => {
+    state.taskJson.value = [...state.taskJson.value, task];
+  };
+  const eraseSelected = () => {
+    const ids = getSelectedIds();
+    batch(() => {
+      selectedTasks.value = [];
+      state.taskJson.value = state.taskJson.value.filter(t => !ids.has(t.id));
+    });
+  };
+  const eraseAction = () => {
+    state.confirmation.onConfirm = eraseSelected;
+    batch(() => {
+      state.confirmation.open.value = true;
+      state.confirmation.text.value = "Warning: This will permanently erase the tasks. Make sure they are not on the sync server. Confirm to erase?";
+    });
+  };
+  const updateSelectedStatus = (status: TaskStatus) => {
+    const ids = getSelectedIds();
+    batch(() => {
+      selectedTasks.value = [];
+      state.taskJson.value = state.taskJson.value.map(t => (
+        ids.has(t.id)
+          ? { ...t, status }
+          : t
+      ));
+    });
+  };
 
-	const colorTask = (task: Task) => {
-		// Only color todo tasks
-		if (props.taskType !== "todo")
-			return "";
+  // highlight urgent tasks
+  const getRowStyle = useComputed(() => {
+    const dark = state.settings.value.dark;
+    return (params: RowClassParams<Task>): CSSProperties => {
+      const task = params.data;
+      // Only color todo tasks
+      if (task.status !== "todo")
+      return undefined;
 
-		const urgency = urgencyMap.get(task.id)!;
-		if (urgency >= 1000)
-			return classes.red;
-		if (urgency >= 100)
-			return classes.amber;
-		if (urgency >= 1)
-			return classes.cyan;
-		return "";
-	};
+      const urg = taskUrgency(task);
+      const color = (
+        urg >= 1000
+          ? red[500]
+          : urg >= 100
+            ? (dark ? amber[600] : amber[800])
+            : urg >= 1
+              ? (dark ? cyan[400] : cyan[600])
+              : undefined
+      );
 
-	return (
-		<>
-			<ConfirmationDialog
-				open={confirmationDialog}
-				text={confirmationText}
-				onCancel={handleEraseCancel}
-				onConfirm={eraseTasks}
-			/>
-			<MUIDataTable
-				title=""
-				options={{
-					print: false,
-					download: false,
-					customToolbar: () => {
-						return <CustomToolbar taskType={props.taskType} onAdd={props.onAdd} />
-					},
-					customToolbarSelect: (selectedRows, _, setSelectedRows) => {
-						const ids = selectedRows.data.map(({ dataIndex }) => tasks[dataIndex].id);
-						return (
-							<CustomToolbarSelect
-								taskType={props.taskType}
-								onRemove={() => {
-									setSelectedRows([]);
-									removeTasks(ids);
-								}}
-								onErase={() => {
-									// When focus is lost, the selected rows will be cleared automatically
-									// setSelectedRows([]);
-									handleErase(ids);
-								}}
-								onUndo={() => {
-									setSelectedRows([]);
-									undoTasks(ids);
-								}}
-								onDo={() => {
-									setSelectedRows([]);
-									doTasks(ids);
-								}}
-							/>
-						);
-					}
-				}}
-				columns={[
-					{
-						name: "priority",
-						label: "P",
-						options: {
-							sortThirdClickReset: true,
-							sortCompare(order) {
-								return (obj1, obj2) => {
-									const a: string = obj1.data;
-									const b: string = obj2.data;
-									let result = 0;
-									if (a === undefined)
-										result = -1;
-									if (b === undefined)
-										result = 1;
-									if (a < b)
-										result = 1;
-									else if (a > b)
-										result = -1;
+      return color && {
+        fontWeight: 500,
+        color
+      };
+    };
+  });
 
-									return result * (order === "asc" ? 1 : -1);
-								};
-							},
-							customBodyRenderLite: index => (
-								<span className={colorTask(tasks[index])}>{tasks[index].priority}</span>
-							)
-						}
-					},
-					{
-						name: "text",
-						label: "Text",
-						options: {
-							filterType: "textField",
-							sort: false,
-							customBodyRenderLite: index => (
-								<TaskText className={colorTask(tasks[index])} text={tasks[index].text} />
-							)
-						}
-					},
-					{
-						name: "projects",
-						label: "Projects",
-						options: {
-							filterType: "multiselect",
-							sort: false,
-							customBodyRenderLite: index => (
-								<>
-									{tasks[index].projects?.map(proj => (
-										<Chip className={classes.chip} label={proj} key={proj} />
-									))}
-								</>
-							)
-						}
-					},
-					{
-						name: "contexts",
-						label: "Contexts",
-						options: {
-							filterType: "multiselect",
-							sort: false,
-							customBodyRenderLite: index => (
-								<>
-									{tasks[index].contexts?.map(ctx => (
-										<Chip className={classes.chip} label={ctx} key={ctx} />
-									))}
-								</>
-							)
-						}
-					},
-					{
-						name: "due",
-						label: "Due",
-						options: {
-							sortThirdClickReset: true,
-							filterType: "textField",
-							customBodyRenderLite: index => (
-								<span className={colorTask(tasks[index])}>{tasks[index].due}</span>
-							)
-						}
-					},
-					{
-						name: "actions",
-						label: "Actions",
-						options: {
-							empty: true,
-							sort: false,
-							customBodyRenderLite: index => (
-								<Actions
-									taskType={props.taskType}
-									task={tasks[index]}
-									onEdit={props.onEdit}
-									onRemove={removeTasks}
-									onErase={handleErase}
-									onUndo={undoTasks}
-									onDo={doTasks}
-								/>
-							)
-						}
-					}
-				]}
-				data={tasks}
-			/>
-		</>
-	);
+  return (
+    <>
+      <ToggleButtonGroup
+        value={taskStatus.value}
+        onChange={(_, value) => value && (taskStatus.value = value)}
+        exclusive
+        sx={{ mb: 2, flexWrap: "wrap" }}
+      >
+        <ToggleButton value="todo" sx={toggleButtonStyle} color="primary">
+          <Icon path={mdiClockOutline} size={1} />
+          <Box sx={{ ml: 0.5 }}>
+            {isSmallDevice || "todo"}
+          </Box>
+        </ToggleButton>
+        <ToggleButton value="done" sx={toggleButtonStyle} color="primary">
+          <Icon path={mdiCheck} size={1} />
+          <Box sx={{ ml: 0.5 }}>
+            {isSmallDevice || "done"}
+          </Box>
+        </ToggleButton>
+        <ToggleButton value="removed" sx={toggleButtonStyle} color="primary">
+          <Icon path={mdiDelete} size={1} />
+          <Box sx={{ ml: 0.5 }}>
+            {isSmallDevice || "removed"}
+          </Box>
+        </ToggleButton>
+      </ToggleButtonGroup>
+
+      <Card>
+        <Box sx={{
+          display: "flex",
+          flexDirection: "row-reverse",
+          p: 0.5
+        }}>
+          <IconButton
+            color="primary"
+            size="small"
+            title="Add"
+            onClick={() => taskDialog.value = true}
+          >
+            <Icon path={mdiPlus} size={1.25} />
+          </IconButton>
+          <IconButton
+            color="error"
+            size="small"
+            title="Erase"
+            sx={{
+              display: taskStatus.value === "removed" && selectedTasks.value.length > 0
+                ? undefined
+                : "none"
+            }}
+            onClick={eraseAction}
+          >
+            <Icon path={mdiEraserVariant} size={1.25} />
+          </IconButton>
+          <IconButton
+            color="error"
+            size="small"
+            title="Delete"
+            sx={{
+              display: taskStatus.value !== "removed" && selectedTasks.value.length > 0
+                ? undefined
+                : "none"
+            }}
+            onClick={() => updateSelectedStatus("removed")}
+          >
+            <Icon path={mdiDelete} size={1.25} />
+          </IconButton>
+          <IconButton
+            color="success"
+            size="small"
+            title="Do"
+            sx={{
+              display: taskStatus.value === "todo" && selectedTasks.value.length > 0
+                ? undefined
+                : "none"
+            }}
+            onClick={() => updateSelectedStatus("done")}
+          >
+            <Icon path={mdiCheck} size={1.25} />
+          </IconButton>
+          <IconButton
+            color="success"
+            size="small"
+            title="Undo"
+            sx={{
+              display: taskStatus.value === "done" && selectedTasks.value.length > 0
+                ? undefined
+                : "none"
+            }}
+            onClick={() => updateSelectedStatus("todo")}
+          >
+            <Icon path={mdiRestore} size={1.25} />
+          </IconButton>
+        </Box>
+
+        <Box className={agTheme.value}>
+          {/* use autoHeight with pagination for auto height based on page size */}
+          <AgGridReact
+            ref={gridRef}
+            pagination={true}
+            paginationPageSize={state.settings.value.pageSize}
+            domLayout="autoHeight"
+            rowData={currentTasks.value}
+            columnDefs={columnDefs.value}
+            defaultColDef={defaultColDef}
+            animateRows={true}
+            suppressRowClickSelection
+            getRowStyle={getRowStyle.value}
+            onSelectionChanged={onSelectionChanged}
+            onCellValueChanged={onCellValueChanged}
+          />
+        </Box>
+
+        <TaskDialog open={taskDialog} onConfirm={addTask} />
+      </Card>
+    </>
+  );
 }
-
-export default TaskList;
