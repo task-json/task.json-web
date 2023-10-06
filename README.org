@@ -1,8 +1,8 @@
-* task.json-web
+* Task.json-web
 
-[[https://github.com/DCsunset/task.json-web/actions/workflows/release.yml/badge.svg]]
+[[https://github.com/task-json/task.json-web/actions/workflows/release.yml/badge.svg]]
 
-Task management Web UI written in Preact//React.js based on [[https://github.com/DCsunset/task.json][task.json]] format.
+Task management Web UI written in Preact//React.js based on [[https://github.com/task-json/task.json][task.json]] format.
 
 
 ** Screenshots
@@ -15,10 +15,11 @@ Task management Web UI written in Preact//React.js based on [[https://github.com
 ** Features
 
 - Material Design UI
-- Local storage for all data (no back-end server)
-- Task synchronization with `task.json-server`
+- Inline task editing
+- Static web page (no backend server needed to deploy)
+- Task synchronization and backup with [[https://github.com/task-json/task.json-server][task.json-server]]
 - Dark and light themes
-
+- Self-hosted
 
 ** Build
 
@@ -31,11 +32,6 @@ npm run build
 
 The packed files can then be found in =build= directory.
 
-To build Android APK, install Android SDK and run:
-
-#+begin_src shell
-npm run build:android
-#+end_src
 
 ** License
 
