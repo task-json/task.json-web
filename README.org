@@ -1,0 +1,60 @@
+* task.json-web
+
+[[https://github.com/DCsunset/task.json-web/actions/workflows/release.yml/badge.svg]]
+
+Task management Web UI written in Preact//React.js based on [[https://github.com/DCsunset/task.json][task.json]] format.
+
+
+** Screenshots
+
+[[./pictures/screenshot-light.png]]
+
+[[./pictures/screenshot-dark.png]]
+
+
+** Features
+
+- Material Design UI
+- Local storage for all data (no back-end server)
+- Task synchronization with `task.json-server`
+- Dark and light themes
+
+
+** Build
+
+To manually build from source, clone this repository and run the following commands:
+
+#+begin_src shell
+npm install
+npm run build
+#+end_src
+
+The packed files can then be found in =build= directory.
+
+To build Android APK, install Android SDK and run:
+
+#+begin_src shell
+npm run build:android
+#+end_src
+
+** License
+
+This project is licensed under AGPL-3.0.
+
+#+begin_quote
+Copyright (C) 2023  DCsunset
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#+end_quote
+
