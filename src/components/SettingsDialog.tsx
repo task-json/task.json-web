@@ -15,20 +15,20 @@
 
 import {
   Box,
-	Button,
-	IconButton,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	Divider,
-	Grid,
-	List,
-	ListItem,
-	ListItemText,
-	TextField,
-	Typography,
-	useMediaQuery,
+  Button,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  TextField,
+  Typography,
+  useMediaQuery,
   Theme
 } from "@mui/material";
 import FileSaver from "file-saver";
@@ -55,21 +55,21 @@ function SettingsDialog(props: Props) {
   const isSmallDevice = useMediaQuery((theme: Theme) => theme.breakpoints.down("xs"));
   const settings = useComputed(() => state.settings.value);
 
-	// Local states
-	const pageSize = useSignal(settings.value.pageSize.toString());
-	const maxPriorities = useSignal(settings.value.maxPriorities.toString());
-	const server = useSignal(settings.value.server ?? "");
+  // Local states
+  const pageSize = useSignal(settings.value.pageSize.toString());
+  const maxPriorities = useSignal(settings.value.maxPriorities.toString());
+  const server = useSignal(settings.value.server ?? "");
   const serverExists = useComputed(() => server.value.length > 0);
-	const password = useSignal("");
+  const password = useSignal("");
 
-	const pageSizeError = useSignal(false);
-	const priorityError = useSignal(false);
+  const pageSizeError = useSignal(false);
+  const priorityError = useSignal(false);
 
   // reset local states
-	const reset = () => {
+  const reset = () => {
     batch(() => {
       maxPriorities.value = settings.value.maxPriorities.toString();
-      password.value  = "";
+      password.value = "";
       server.value = settings.value.server ?? "";
       priorityError.value = false;
     })
@@ -99,8 +99,8 @@ function SettingsDialog(props: Props) {
       return;
 
     const reader = new FileReader();
-		reader.onload = () => {
-			const taskJson = deserializeTaskJson(reader.result as string);
+    reader.onload = () => {
+      const taskJson = deserializeTaskJson(reader.result as string);
       state.taskJson.value = taskJson;
       state.notifications.value = [
         ...state.notifications.value,
@@ -109,19 +109,19 @@ function SettingsDialog(props: Props) {
           color: "success",
           text: "Data imported successfully"
         }
-			];
-		};
-		reader.readAsText(files[0]);
-	};
+      ];
+    };
+    reader.readAsText(files[0]);
+  };
 
-	const exportData = () => {
-		const blob = new Blob([
+  const exportData = () => {
+    const blob = new Blob([
       serializeTaskJson(state.taskJson.value)
-		], { type: "text/plain;charset=utf-8" });
-		FileSaver.saveAs(blob, "task.json");
-	};
+    ], { type: "text/plain;charset=utf-8" });
+    FileSaver.saveAs(blob, "task.json");
+  };
 
-	const clearData = () => {
+  const clearData = () => {
     batch(() => {
       state.taskJson.value = [];
       state.notifications.value = [
@@ -131,264 +131,264 @@ function SettingsDialog(props: Props) {
           color: "success",
           text: "Successfully cleared data"
         }
-			];
+      ];
     });
-	};
+  };
 
-	const clearAction = () => {
+  const clearAction = () => {
     state.confirmation.onConfirm = clearData;
     batch(() => {
       state.confirmation.open.value = true;
       state.confirmation.text.value = "Warning: This will clear all the data in the local storage. Are you sure to clear?";
     });
-	};
+  };
 
   // TODO: add actions
-	const loginAction = async () => {
+  const loginAction = async () => {
     await login(server.value, password.value);
-	}
+  }
 
-	return (
-		<Dialog
-			open={props.open.value}
-			onClose={() => props.open.value = false}
-			disableBackdropClick
-			fullWidth
-		>
-			<DialogTitle sx={{ pb: 0 }}>Settings</DialogTitle>
-			<DialogContent sx={{ px: isSmallDevice ? 1 : 0  }}>
-				<List>
-					<Box sx={{ mx:2, mt: 2 }}>
-						<Typography color="textSecondary" sx={{ mb: 0.5 }}>
-							General
-						</Typography>
-						<Divider />
-					</Box>
+  return (
+    <Dialog
+      open={props.open.value}
+      onClose={() => props.open.value = false}
+      disableBackdropClick
+      fullWidth
+    >
+      <DialogTitle sx={{ pb: 0 }}>Settings</DialogTitle>
+      <DialogContent sx={{ px: isSmallDevice ? 1 : 0 }}>
+        <List>
+          <Box sx={{ mx: 2, mt: 2 }}>
+            <Typography color="textSecondary" sx={{ mb: 0.5 }}>
+              General
+            </Typography>
+            <Divider />
+          </Box>
 
-					<ListItem>
-						<Grid container justifyContent="space-between" alignItems="center">
-							<Grid item>
-								<ListItemText secondary={
-									<span>
+          <ListItem>
+            <Grid container justifyContent="space-between" alignItems="center">
+              <Grid item>
+                <ListItemText secondary={
+                  <span>
                     positive integer
-									</span>
-								}>
-									Number of tasks per page
-								</ListItemText>
-							</Grid>
-							<Grid item>
-								<TextField
+                  </span>
+                }>
+                  Number of tasks per page
+                </ListItemText>
+              </Grid>
+              <Grid item>
+                <TextField
                   variant="standard"
-									type="number"
+                  type="number"
                   sx={{ maxWidth: "45px" }}
-									error={pageSizeError.value}
-									value={pageSize.value}
-									onChange={(event: any) => {
-										const value = event.target.value;
+                  error={pageSizeError.value}
+                  value={pageSize.value}
+                  onChange={(event: any) => {
+                    const value = event.target.value;
                     pageSizeError.value = !validNumber(value, 1, 26);
                     pageSize.value = value;
-									}}
-								/>
-							</Grid>
-						</Grid>
-					</ListItem>
+                  }}
+                />
+              </Grid>
+            </Grid>
+          </ListItem>
 
-					<ListItem>
-						<Grid container justifyContent="space-between" alignItems="center">
-							<Grid item>
-								<ListItemText secondary={
-									<span>
-										between 1 and 26
-										(start from <b>A</b>)
-									</span>
-								}>
-									Max number of priorities
-								</ListItemText>
-							</Grid>
-							<Grid item>
-								<TextField
+          <ListItem>
+            <Grid container justifyContent="space-between" alignItems="center">
+              <Grid item>
+                <ListItemText secondary={
+                  <span>
+                    between 1 and 26
+                    (start from <b>A</b>)
+                  </span>
+                }>
+                  Max number of priorities
+                </ListItemText>
+              </Grid>
+              <Grid item>
+                <TextField
                   variant="standard"
-									type="number"
+                  type="number"
                   sx={{ maxWidth: "45px" }}
-									error={priorityError.value}
-									value={maxPriorities.value}
-									onChange={(event: any) => {
-										const value = event.target.value;
+                  error={priorityError.value}
+                  value={maxPriorities.value}
+                  onChange={(event: any) => {
+                    const value = event.target.value;
                     priorityError.value = !validNumber(value, 1, 26);
                     maxPriorities.value = value;
-									}}
-								/>
-							</Grid>
-						</Grid>
-					</ListItem>
+                  }}
+                />
+              </Grid>
+            </Grid>
+          </ListItem>
 
-					<ListItem>
-						<Grid container justifyContent="space-between" alignItems="center">
-							<Grid item>
-								<ListItemText secondary="task.json">
-									JSON data
-								</ListItemText>
-							</Grid>
-							<Grid item>
-								<IconButton
-									color="success"
+          <ListItem>
+            <Grid container justifyContent="space-between" alignItems="center">
+              <Grid item>
+                <ListItemText secondary="task.json">
+                  JSON data
+                </ListItemText>
+              </Grid>
+              <Grid item>
+                <IconButton
+                  color="success"
                   sx={{ ml: 1 }}
-									onClick={exportData}
-									title="Export"
-								>
+                  onClick={exportData}
+                  title="Export"
+                >
                   <Icon path={mdiExport} size={1} />
-								</IconButton>
-								<input
-									id="import-data-input"
-									style={{ display: "none" }}
-									type="file"
-									onChange={event => importData(event.target.files)}
-								/>
-								<label htmlFor="import-data-input">
-									<IconButton
-										color="primary"
+                </IconButton>
+                <input
+                  id="import-data-input"
+                  style={{ display: "none" }}
+                  type="file"
+                  onChange={event => importData(event.target.files)}
+                />
+                <label htmlFor="import-data-input">
+                  <IconButton
+                    color="primary"
                     sx={{ ml: 1 }}
-										component="span"
-										title="Import"
-									>
+                    component="span"
+                    title="Import"
+                  >
                     <Icon path={mdiImport} size={1} />
-									</IconButton>
-								</label>
-								<IconButton
+                  </IconButton>
+                </label>
+                <IconButton
                   color="error"
                   sx={{ ml: 1 }}
-									title="Clear"
-									onClick={clearAction}
-								>
+                  title="Clear"
+                  onClick={clearAction}
+                >
                   <Icon path={mdiDelete} size={1} />
-								</IconButton>
-							</Grid>
-						</Grid>
-					</ListItem>
+                </IconButton>
+              </Grid>
+            </Grid>
+          </ListItem>
 
-					<Box sx={{ mx:2, mt: 2 }}>
-						<Typography color="textSecondary" sx={{ mb: 0.5 }}>
-							Server
-						</Typography>
-						<Divider />
-					</Box>
+          <Box sx={{ mx: 2, mt: 2 }}>
+            <Typography color="textSecondary" sx={{ mb: 0.5 }}>
+              Server
+            </Typography>
+            <Divider />
+          </Box>
 
-					<ListItem>
-						<Grid container sx={{
+          <ListItem>
+            <Grid container sx={{
               justifyContent: "space-between",
               alignItems: "center"
             }}>
-							<Grid item>
-								<ListItemText secondary="task.json-server">
-									Server
-								</ListItemText>
-							</Grid>
-							<Grid item>
-								<TextField
+              <Grid item>
+                <ListItemText secondary="task.json-server">
+                  Server
+                </ListItemText>
+              </Grid>
+              <Grid item>
+                <TextField
                   variant="standard"
                   label="Server URL"
-									value={server.value}
-									onChange={event => server.value = event.target.value}
-								/>
-							</Grid>
-						</Grid>
-					</ListItem>
+                  value={server.value}
+                  onChange={event => server.value = event.target.value}
+                />
+              </Grid>
+            </Grid>
+          </ListItem>
 
-					<ListItem>
-						<Grid container sx={{
+          <ListItem>
+            <Grid container sx={{
               justifyContent: "space-between",
               alignItems: "center"
             }}>
-							<Grid item>
-								<ListItemText secondary={settings.token ? "already logged in" : "not logged in"}>
-									Session
-								</ListItemText>
-							</Grid>
-							<Grid item style={{
-								display: "flex",
-								alignItems: "center"
-							}}>
-								{!settings.token && (
-									<>
-										<TextField
+              <Grid item>
+                <ListItemText secondary={state.loggedIn.value ? "already logged in" : "not logged in"}>
+                  Session
+                </ListItemText>
+              </Grid>
+              <Grid item style={{
+                display: "flex",
+                alignItems: "center"
+              }}>
+                {!state.loggedIn.value && (
+                  <>
+                    <TextField
                       variant="standard"
-											type="password"
+                      type="password"
                       sx={{ maxWidth: "200px", ml: 1 }}
-											label="password"
-											value={password.value}
-											disabled={!serverExists.value}
-											onChange={event => password.value = event.target.value}
-										/>
-										<Button
-											color="secondary"
-											size="small"
-											disabled={!serverExists.value || password.value.length === 0}
-											onClick={loginAction}
-										>
-											Log in
-										</Button>
-									</>
-								)}
-								{Boolean(settings.token) &&
-									<Button
-										size="small"
+                      label="password"
+                      value={password.value}
+                      disabled={!serverExists.value}
+                      onChange={event => password.value = event.target.value}
+                    />
+                    <Button
+                      color="primary"
+                      size="small"
+                      disabled={!serverExists.value || password.value.length === 0}
+                      onClick={loginAction}
+                    >
+                      Log in
+                    </Button>
+                  </>
+                )}
+                {state.loggedIn.value &&
+                  <Button
+                    size="small"
                     color="error"
-										onClick={logout}
-									>
-										Log out
-									</Button>
-								}
-							</Grid>
-						</Grid>
-					</ListItem>
+                    onClick={logout}
+                  >
+                    Log out
+                  </Button>
+                }
+              </Grid>
+            </Grid>
+          </ListItem>
 
-					<ListItem>
-						<Grid container justifyContent="space-between" alignItems="center">
-							<Grid item>
-								<ListItemText>
-									Sync
-								</ListItemText>
-							</Grid>
-							<Grid item>
-								<IconButton
-									color="secondary"
+          <ListItem>
+            <Grid container justifyContent="space-between" alignItems="center">
+              <Grid item>
+                <ListItemText>
+                  Sync
+                </ListItemText>
+              </Grid>
+              <Grid item>
+                <IconButton
+                  color="secondary"
                   sx={{ ml: 1 }}
-									onClick={syncTasks}
-									disabled={!settings.token}
-									title="Sync"
-								>
+                  onClick={syncTasks}
+                  disabled={!state.loggedIn.value}
+                  title="Sync"
+                >
                   <Icon path={mdiSync} size={1} />
-								</IconButton>
-								<IconButton
-									color="primary"
+                </IconButton>
+                <IconButton
+                  color="primary"
                   sx={{ ml: 1 }}
-									onClick={uploadTasks}
-									disabled={!settings.token}
-									title="Upload"
-								>
+                  onClick={uploadTasks}
+                  disabled={!state.loggedIn.value}
+                  title="Upload"
+                >
                   <Icon path={mdiCloudUpload} size={1} />
-								</IconButton>
-								<IconButton
+                </IconButton>
+                <IconButton
                   color="error"
                   sx={{ ml: 1 }}
-									onClick={downloadTasks}
-									disabled={!settings.token}
-									title="Download"
-								>
+                  onClick={downloadTasks}
+                  disabled={!state.loggedIn.value}
+                  title="Download"
+                >
                   <Icon path={mdiCloudDownload} size={1} />
-								</IconButton>
-							</Grid>
-						</Grid>
-					</ListItem>
-				</List>
-			</DialogContent>
-			<DialogActions>
-				<Button color="inherit" onClick={close}>Cancel</Button>
-				<Button color="error" onClick={reset}>Reset</Button>
-				<Button color="primary" onClick={save}>Save</Button>
-			</DialogActions>
-		</Dialog>
-	);
+                </IconButton>
+              </Grid>
+            </Grid>
+          </ListItem>
+        </List>
+      </DialogContent>
+      <DialogActions>
+        <Button color="inherit" onClick={close}>Cancel</Button>
+        <Button color="error" onClick={reset}>Reset</Button>
+        <Button color="primary" onClick={save}>Save</Button>
+      </DialogActions>
+    </Dialog>
+  );
 }
 
 export default SettingsDialog;

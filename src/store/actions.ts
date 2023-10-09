@@ -37,6 +37,7 @@ export async function login(server: string, password: string) {
   try {
     state.client = await setupClient({ server });
     await state.client.login(password);
+    state.loggedIn.value = true;
   }
   catch (err: any) {
     handleError(err);
@@ -46,6 +47,7 @@ export async function login(server: string, password: string) {
 export async function logout() {
   try {
     await state.client.logout();
+    state.loggedIn.value = false;
   }
   catch (err: any) {
     handleError(err);

@@ -78,6 +78,7 @@ export const state = {
   },
   // Client to connect to server
   client: null as (Client | null),
+  loggedIn: signal(false)
 };
 
 function aggregateTasks(tasks: Task[], field: "projects" | "contexts") {
