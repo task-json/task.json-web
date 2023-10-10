@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { createNotification, state } from "./state";
+import { state } from "./state";
 import { HttpError, setupClient } from "task.json-client";
 
 function handleError(error: any) {
@@ -24,13 +24,10 @@ function handleError(error: any) {
 	else {
 		message = (error as Error).message;
 	}
-	state.notifications.value = [
-    ...state.notifications.value,
-    createNotification({
-      color: "error",
-      text: message
-    })
-  ];
+	state.notification.value = {
+    color: "error",
+    text: message
+  };
 }
 
 export async function login(server: string, password: string) {

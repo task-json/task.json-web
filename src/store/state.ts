@@ -19,15 +19,9 @@ import { AlertColor } from "@mui/material/Alert";
 import { Client } from "task.json-client";
 
 export type Notification = {
-	id?: string;
 	color: AlertColor;
 	text: string;
 };
-
-export const createNotification = (payload: Notification) => ({
-	...payload,
-	id: new Date().toISOString()
-});
 
 export type Settings = {
   pageSize: number;
@@ -70,7 +64,7 @@ export const state = {
 		maxPriorities: 3,
 		dark: false
 	})),
-  notifications: signal<Notification[]>([]),
+  notification: signal<Notification | null>(null),
   confirmation: {
     open: signal(false),
     text: signal(""),

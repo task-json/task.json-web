@@ -15,10 +15,11 @@
 
 import { state } from "../store/state";
 import { AppBar, Box, Toolbar, Typography, IconButton } from "@mui/material";
+import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import { blue } from "@mui/material/colors";
 import Icon from '@mdi/react';
 import { mdiStickerCheckOutline, mdiBrightness4, mdiBrightness7, mdiCog } from '@mdi/js';
-import { signal, useComputed } from "@preact/signals";
+import { signal, useComputed, useSignalEffect } from "@preact/signals";
 import SettingsDialog from "./SettingsDialog";
 
 
@@ -37,6 +38,14 @@ export default function Layout(props: Props) {
       dark: !dark.value
     };
   };
+
+  useSignalEffect(() => {
+    const notification = state.notification.value;
+    if (notification) {
+      const { text, color } = notification;
+      enqueueSnackbar(text, { variant: color });
+    }
+  });
 
   return (
     <>
@@ -69,6 +78,8 @@ export default function Layout(props: Props) {
       </AppBar>
 
       <SettingsDialog open={settingsDialog} />
+
+      <SnackbarProvider anchorOrigin={{ horizontal: "center", vertical: "bottom" }} />
 
       <Box sx={{ my: 3 }}>
 				{props.children}

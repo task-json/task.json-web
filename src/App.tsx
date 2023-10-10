@@ -21,7 +21,6 @@ import {
   createTheme,
   Box,
 } from "@mui/material";
-import { blue, green } from "@mui/material/colors";
 import { state } from "./store/state";
 import Layout from "./components/Layout";
 import TaskList from "./components/TaskList";

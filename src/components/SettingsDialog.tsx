@@ -102,14 +102,10 @@ function SettingsDialog(props: Props) {
     reader.onload = () => {
       const taskJson = deserializeTaskJson(reader.result as string);
       state.taskJson.value = taskJson;
-      state.notifications.value = [
-        ...state.notifications.value,
-        {
-          id: new Date().toISOString(),
-          color: "success",
-          text: "Data imported successfully"
-        }
-      ];
+      state.notification.value = {
+        color: "success",
+        text: "Data imported successfully"
+      };
     };
     reader.readAsText(files[0]);
   };
@@ -124,14 +120,10 @@ function SettingsDialog(props: Props) {
   const clearData = () => {
     batch(() => {
       state.taskJson.value = [];
-      state.notifications.value = [
-        ...state.notifications.value,
-        {
-          id: new Date().toISOString(),
-          color: "success",
-          text: "Successfully cleared data"
-        }
-      ];
+      state.notification.value = {
+        color: "success",
+        text: "Successfully cleared data"
+      };
     });
   };
 
