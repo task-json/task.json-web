@@ -28,6 +28,7 @@ export type Settings = {
 	maxPriorities: number;
 	dark: boolean;
 	server?: string;
+  token?: string;
 };
 
 function merge(value: any, init: any) {
@@ -71,8 +72,7 @@ export const state = {
     onConfirm: () => {}
   },
   // Client to connect to server
-  client: null as (Client | null),
-  loggedIn: signal(false)
+  client: null as (Client | null)
 };
 
 function aggregateTasks(tasks: Task[], field: "projects" | "contexts") {
@@ -102,6 +102,8 @@ export const computedState = {
 // Persist state on change
 effect(() => {
   localStorage.setItem("taskJson", JSON.stringify(state.taskJson.value));
+});
+effect(() => {
   localStorage.setItem("settings", JSON.stringify(state.settings.value));
 });
 

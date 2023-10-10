@@ -19,7 +19,7 @@ import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import { blue } from "@mui/material/colors";
 import Icon from '@mdi/react';
 import { mdiStickerCheckOutline, mdiBrightness4, mdiBrightness7, mdiCog } from '@mdi/js';
-import { signal, useComputed, useSignalEffect } from "@preact/signals";
+import { useComputed, useSignal, useSignalEffect } from "@preact/signals";
 import SettingsDialog from "./SettingsDialog";
 
 
@@ -29,8 +29,7 @@ interface Props {
 
 export default function Layout(props: Props) {
   const dark = useComputed(() => state.settings.value.dark);
-
-  const settingsDialog = signal(false);
+  const settingsDialog = useSignal(false);
 
   const toggleTheme = () => {
     state.settings.value = {

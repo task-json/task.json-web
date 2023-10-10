@@ -30,11 +30,26 @@ function handleError(error: any) {
   };
 }
 
-export async function login(server: string, password: string) {
+function updateToken(token?: string) {
+  state.settings.value = {
+    ...state.settings.value,
+    token: state.client.config.token
+  };
+}
+
+async function initClient(overwrite: boolean) {
+  // set up client if null or overwrite is true
+  if (state.client == null || overwrite) {
+    const { server, token } = state.settings.value;
+    state.client = await setupClient({ server, token });
+  }
+}
+
+export async function login(password: string) {
   try {
-    state.client = await setupClient({ server });
+    await initClient(true);
     await state.client.login(password);
-    state.loggedIn.value = true;
+    updateToken(state.client.config.token);
   }
   catch (err: any) {
     handleError(err);
@@ -43,8 +58,9 @@ export async function login(server: string, password: string) {
 
 export async function logout() {
   try {
+    await initClient(false);
     await state.client.logout();
-    state.loggedIn.value = false;
+    updateToken(state.client.config.token);
   }
   catch (err: any) {
     handleError(err);
@@ -53,6 +69,7 @@ export async function logout() {
 
 export async function syncTasks() {
   try {
+    await initClient(false);
     const { data } = await state.client.sync(state.taskJson.value);
     state.taskJson.value = data;
   }
@@ -63,6 +80,7 @@ export async function syncTasks() {
 
 export async function downloadTasks() {
   try {
+    await initClient(false);
     const { data } = await state.client.download();
     state.taskJson.value = data;
   }
@@ -73,6 +91,7 @@ export async function downloadTasks() {
 
 export async function uploadTasks() {
   try {
+    await initClient(false);
     await state.client.upload(state.taskJson.value);
   }
   catch (err: any) {

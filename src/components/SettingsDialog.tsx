@@ -54,6 +54,7 @@ const validNumber = (value: string, min: number, max: number) => {
 function SettingsDialog(props: Props) {
   const isSmallDevice = useMediaQuery((theme: Theme) => theme.breakpoints.down("xs"));
   const settings = useComputed(() => state.settings.value);
+  const loggedIn = useComputed(() => settings.value.token !== undefined);
 
   // Local states
   const pageSize = useSignal(settings.value.pageSize.toString());
@@ -135,10 +136,14 @@ function SettingsDialog(props: Props) {
     });
   };
 
-  // TODO: add actions
   const loginAction = async () => {
-    await login(server.value, password.value);
-  }
+    // save server immediately
+    state.settings.value = {
+      ...settings.value,
+      server: serverExists.value ? server.value : undefined
+    };
+    await login(password.value);
+  };
 
   return (
     <Dialog
@@ -292,7 +297,7 @@ function SettingsDialog(props: Props) {
               alignItems: "center"
             }}>
               <Grid item>
-                <ListItemText secondary={state.loggedIn.value ? "already logged in" : "not logged in"}>
+                <ListItemText secondary={loggedIn.value ? "already logged in" : "not logged in"}>
                   Session
                 </ListItemText>
               </Grid>
@@ -300,7 +305,7 @@ function SettingsDialog(props: Props) {
                 display: "flex",
                 alignItems: "center"
               }}>
-                {!state.loggedIn.value && (
+                {!loggedIn.value && (
                   <>
                     <TextField
                       variant="standard"
@@ -321,7 +326,7 @@ function SettingsDialog(props: Props) {
                     </Button>
                   </>
                 )}
-                {state.loggedIn.value &&
+                {loggedIn.value &&
                   <Button
                     size="small"
                     color="error"
@@ -343,10 +348,10 @@ function SettingsDialog(props: Props) {
               </Grid>
               <Grid item>
                 <IconButton
-                  color="secondary"
+                  color="success"
                   sx={{ ml: 1 }}
                   onClick={syncTasks}
-                  disabled={!state.loggedIn.value}
+                  disabled={!loggedIn.value}
                   title="Sync"
                 >
                   <Icon path={mdiSync} size={1} />
@@ -355,7 +360,7 @@ function SettingsDialog(props: Props) {
                   color="primary"
                   sx={{ ml: 1 }}
                   onClick={uploadTasks}
-                  disabled={!state.loggedIn.value}
+                  disabled={!loggedIn.value}
                   title="Upload"
                 >
                   <Icon path={mdiCloudUpload} size={1} />
@@ -364,7 +369,7 @@ function SettingsDialog(props: Props) {
                   color="error"
                   sx={{ ml: 1 }}
                   onClick={downloadTasks}
-                  disabled={!state.loggedIn.value}
+                  disabled={!loggedIn.value}
                   title="Download"
                 >
                   <Icon path={mdiCloudDownload} size={1} />
