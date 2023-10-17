@@ -29,6 +29,7 @@ export type Settings = {
 	dark: boolean;
 	server?: string;
   token?: string;
+  encryptionKey?: string;
 };
 
 function merge(value: any, init: any) {

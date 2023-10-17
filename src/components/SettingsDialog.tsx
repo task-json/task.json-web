@@ -62,6 +62,7 @@ function SettingsDialog(props: Props) {
   const server = useSignal(settings.value.server ?? "");
   const serverExists = useComputed(() => server.value.length > 0);
   const password = useSignal("");
+  const encryptionKey = useSignal(settings.value.encryptionKey ?? "");
 
   const pageSizeError = useSignal(false);
   const priorityError = useSignal(false);
@@ -72,6 +73,7 @@ function SettingsDialog(props: Props) {
       maxPriorities.value = settings.value.maxPriorities.toString();
       password.value = "";
       server.value = settings.value.server ?? "";
+      encryptionKey.value = settings.value.encryptionKey ?? "";
       priorityError.value = false;
     })
   };
@@ -88,7 +90,8 @@ function SettingsDialog(props: Props) {
           ...settings.value,
           maxPriorities: parseInt(maxPriorities.value),
           pageSize: parseInt(pageSize.value),
-          server: serverExists.value ? server.value : undefined
+          server: serverExists.value ? server.value : undefined,
+          encryptionKey: encryptionKey.value.length > 0 ? encryptionKey.value : undefined
         };
         props.open.value = false;
       });
@@ -143,6 +146,11 @@ function SettingsDialog(props: Props) {
       server: serverExists.value ? server.value : undefined
     };
     await login(password.value);
+  };
+
+  const withEncryptionKey = (action: any) => () => {
+    state.client.config.encryptionKey = encryptionKey.value;
+    action();
   };
 
   return (
@@ -311,7 +319,7 @@ function SettingsDialog(props: Props) {
                       variant="standard"
                       type="password"
                       sx={{ maxWidth: "200px", ml: 1 }}
-                      label="password"
+                      label="Password"
                       value={password.value}
                       disabled={!serverExists.value}
                       onChange={event => password.value = event.target.value}
@@ -350,7 +358,7 @@ function SettingsDialog(props: Props) {
                 <IconButton
                   color="success"
                   sx={{ ml: 1 }}
-                  onClick={syncTasks}
+                  onClick={withEncryptionKey(syncTasks)}
                   disabled={!loggedIn.value}
                   title="Sync"
                 >
@@ -359,7 +367,7 @@ function SettingsDialog(props: Props) {
                 <IconButton
                   color="primary"
                   sx={{ ml: 1 }}
-                  onClick={uploadTasks}
+                  onClick={withEncryptionKey(uploadTasks)}
                   disabled={!loggedIn.value}
                   title="Upload"
                 >
@@ -368,12 +376,35 @@ function SettingsDialog(props: Props) {
                 <IconButton
                   color="error"
                   sx={{ ml: 1 }}
-                  onClick={downloadTasks}
+                  onClick={withEncryptionKey(downloadTasks)}
                   disabled={!loggedIn.value}
                   title="Download"
                 >
                   <Icon path={mdiCloudDownload} size={1} />
                 </IconButton>
+              </Grid>
+            </Grid>
+          </ListItem>
+
+          <ListItem>
+            <Grid container sx={{
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
+              <Grid item>
+                <ListItemText secondary="empty for no encryption">
+                  Encryption Key
+                </ListItemText>
+              </Grid>
+              <Grid item>
+                <TextField
+                  variant="standard"
+                  type="password"
+                  label="Key"
+                  value={encryptionKey.value}
+                  onChange={event => encryptionKey.value = event.target.value}
+                  disabled={!loggedIn.value}
+                />
               </Grid>
             </Grid>
           </ListItem>
